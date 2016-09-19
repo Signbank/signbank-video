@@ -1,25 +1,57 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""
-test_signbank-video
-------------
-
-Tests for `signbank-video` models module.
-"""
+import os
+import shutil
 
 from django.test import TestCase
+from django.core.files import File
+from django.conf import settings
 
-from video import models
+from video.models import Video, GlossVideo
 
 
-class TestVideo(TestCase):
+class VideoTests(TestCase):
+    def setUp(self): 
+        self.vidfilename = "video/testmedia/video.mp4"
+        self.videofile = File(open(self.vidfilename, encoding="latin-1"), "12345.mp4")
+    
+    def test_Video_create(self):
+        """We can create a video object"""  
+        
+        vid = Video.objects.create(videofile=self.videofile)
 
-    def setUp(self):
-        pass
-
-    def test_something(self):
-        pass
-
-    def tearDown(self):
-        pass
+        # new file should be located in upload
+        self.assertEquals(os.path.dirname(vid.videofile.name), settings.VIDEO_UPLOAD_LOCATION)
+        self.assertTrue(os.path.exists(vid.videofile.path), "vidfile doesn't exist at %s" % (vid.videofile.path,))
+        
+        # test deletion of files
+        
+        vid.delete_files()
+        self.assertFalse(os.path.exists(vid.videofile.path), "vidfile still exists after delete at %s" % (vid.videofile.path,))
+        
+    def test_GlossVideo_create(self):
+        """We can create a GlossVideo object"""
+        
+        vid = GlossVideo.objects.create(videofile=self.videofile) 
+ 
+        
+        self.assertTrue(os.path.exists(vid.videofile.path), "vidfile doesn't exist at %s" % (vid.videofile.path,))
+        
+        vid.delete_files()
+        self.assertFalse(os.path.exists(vid.videofile.path), "vidfile still exists after delete at %s" % (vid.videofile.path,))
+        
+    def test_Video_poster_path(self):
+        """We can generate a poster image for a video"""
+        
+        vid = Video.objects.create(videofile=self.videofile)
+        # remove video file when done
+        self.addCleanup(lambda: os.unlink(vid.videofile.path))
+        
+        poster = vid.poster_path()
+        poster_abs = os.path.join(settings.MEDIA_ROOT, poster)
+        # remove poster image when done
+        self.addCleanup(lambda: os.unlink(poster_abs))
+        
+        self.assertTrue(os.path.exists(poster_abs), "poster image %s is missing" % (poster_abs,))
+        
+        # do it again should give the same result, but won't have created the file
+        poster2 = vid.poster_path()
+        self.assertEqual(poster, poster2) 

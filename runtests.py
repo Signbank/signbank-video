@@ -21,6 +21,17 @@ try:
         ],
         SITE_ID=1,
         MIDDLEWARE_CLASSES=(),
+        
+
+        LANGUAGE_NAME = "Auslan",
+        COUNTRY_NAME = "Australia",
+        SITE_TITLE = "Signbank",
+
+
+
+        VIDEO_UPLOAD_LOCATION = "upload",
+        GLOSS_VIDEO_DIRECTORY = "video",
+        
     )
 
     try:
