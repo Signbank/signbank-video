@@ -82,7 +82,6 @@ class VideoPosterMixin:
 
     def delete_files(self):
         """Delete the files associated with this object"""
-
         try:
             os.unlink(self.videofile.path)
             poster_path = self.poster_path(create=False)
@@ -114,13 +113,9 @@ class GlossVideoStorage(FileSystemStorage):
     def get_valid_name(self, name):
         """Generate a valid name, we use directories named for the
         first two digits in the filename to partition the videos"""
-
         (targetdir, basename) = os.path.split(name)
-        
         path = os.path.join(str(basename)[:2], str(basename))
-
         result = os.path.join(targetdir, path)
-
         return result
 
 

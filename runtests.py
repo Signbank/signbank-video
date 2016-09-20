@@ -1,4 +1,5 @@
 import sys
+import os
 
 try:
     from django.conf import settings
@@ -27,8 +28,8 @@ try:
         COUNTRY_NAME = "Australia",
         SITE_TITLE = "Signbank",
 
-
-
+        MEDIA_ROOT = os.path.join((os.path.dirname(os.path.abspath(__file__))),
+          "tests", "testmedia"),
         VIDEO_UPLOAD_LOCATION = "upload",
         GLOSS_VIDEO_DIRECTORY = "video",
         
