@@ -33,6 +33,15 @@ try:
         VIDEO_UPLOAD_LOCATION = "upload",
         GLOSS_VIDEO_DIRECTORY = "video",
         
+        FFMPEG_PROGRAM = "/usr/bin/ffmpeg",
+        FFMPEG_TIMEOUT = 60,
+        FFMPEG_OPTIONS = ["-vcodec", "h264", "-an"],
+        
+
+
+        # defines the aspect ratio for videos
+        VIDEO_ASPECT_RATIO = 3.0/4.0
+        
     )
 
     try:
