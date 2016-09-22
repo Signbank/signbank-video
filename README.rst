@@ -8,8 +8,9 @@ signbank-video
 .. image:: https://travis-ci.org/hujosh/signbank-video.png?branch=master
     :target: https://travis-ci.org/hujosh/signbank-video
     
-.. image:: https://coveralls.io/repos/github/hujosh/signbank-video/badge.svg?branch=master
-    :target: https://coveralls.io/github/hujosh/signbank-video?branch=master
+.. image:: https://codecov.io/gh/hujosh/signbank-video/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/hujosh/signbank-video
+
 
     
 The video component of the Signbank app
