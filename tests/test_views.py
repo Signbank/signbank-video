@@ -8,7 +8,8 @@ from django.contrib.auth.models import AnonymousUser, User, Permission
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib import messages
 
-from video.views import addvideo, successpage
+from video.views import addvideo, successpage, deletevideo
+from video.models import GlossVideo
 from .basetests import BaseTest
 
 def create_request(url, method, data=None, permission=None):
@@ -103,9 +104,8 @@ class SuccessPageTests(BaseTest):
         
     def test_success_page_view_redirects_to_index_if_no_success_messages(self):
         '''
-        If a user accesses the successpage view, and
-        he has no sucess messages, then he should be
-        redirected to the idnex view.
+        The successpage view should redirect to
+        index if there are no messsages.
         '''
         request = create_request(url=self.url, method='post')
         response = addvideo(request)
@@ -114,9 +114,8 @@ class SuccessPageTests(BaseTest):
         
     def test_success_page_view_renders_success_page_if_there_are_success_messages(self):
         '''
-        If a user accesses the successpage view,
-        and he has success messages,
-        'success_page.html' should be rendered.
+        The successpage view should render 'vide/success_page.html'
+        if there are messages.
         '''
         request = create_request(url=self.url, method='post')
         messages.add_message(request, messages.INFO, 'TEST MESSAGE!')
@@ -124,17 +123,63 @@ class SuccessPageTests(BaseTest):
             response = successpage(request)
         
     def test_success_page_view_returns_200_response_code_if_there_are_messages(self):
+        '''
+        The successpage view should return a response code of
+        200 if there are messages.
+        '''
         request = create_request(url=self.url, method='post')
         messages.add_message(request, messages.INFO, 'TEST MESSAGE!')   
         response = successpage(request)
         self.assertEqual(200, response.status_code)
-           
-    
+          
+class DeleteVideoTests(BaseTest):
+    def setUp(self):
+        BaseTest.setUp(self)
+        self.factory = RequestFactory()
+        # the url is irrelevant when RequestFactory is used...
+        self.url = '/delete/1/'
         
         
-        
+    def test_deletevideo_redirects_to_index_on_successful_delete_if_no_referer(self):
+        '''
+        The deletevideo view should redirect to index on successful delete
+        if there is no referer.
+        '''
+        # First, create the video
+        gloss_id = 1
+        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        request = create_request(url=self.url, method='post')
+        response = deletevideo(request, gloss_id)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
    
+    def test_deletevideo_redirects_to_referer_on_successful_delete_if_referer_given(self):
+        '''
+        The deletevideo view should redirect to referer if
+        it's given and on success.
+        '''
+        # First, create the video
+        gloss_id = 1
+        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        request = create_request(url=self.url, method='post')
+        referer_test = '/test/test'
+        request.META['HTTP_REFERER'] = referer_test
+        response = deletevideo(request, gloss_id)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, referer_test)
         
+    def test_deletevideo_removes_video(self):
+        '''
+        The deletevideo view should delete the video
+        '''
+        # First, create the video
+        gloss_id = 1
+        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        request = create_request(url=self.url, method='post')
+        response = deletevideo(request, gloss_id)
+        videos =  GlossVideo.objects.all()
+        self.assertEqual(len(videos),0)
+    
         
         
         
