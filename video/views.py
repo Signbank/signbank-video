@@ -112,7 +112,7 @@ def iframe(request, videoid):
     
 def successpage(request):
     # If there is a success message to display
-    if messages.get_messages():
+    if messages.get_messages(request):
         return render(request, "video/success_page.html")
     else:
     # If not go back to the index page

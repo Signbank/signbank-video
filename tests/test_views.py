@@ -6,8 +6,9 @@ from django.conf import settings
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import AnonymousUser, User, Permission
 from django.contrib.messages.storage.fallback import FallbackStorage
+from django.contrib import messages
 
-from video.views import addvideo
+from video.views import addvideo, successpage
 from .basetests import BaseTest
 
 def create_request(url, method, data=None, permission=None):
@@ -91,6 +92,49 @@ class AddVideoTests(BaseTest):
         response = addvideo(request)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(test_referer, response.url)
+       
+         
+class SuccessPageTests(BaseTest):
+    def setUp(self):
+        BaseTest.setUp(self)
+        self.factory = RequestFactory()
+        # the url is irrelevant when RequestFactory is used...
+        self.url = '/success/'
+        
+    def test_success_page_view_redirects_to_index_if_no_success_messages(self):
+        '''
+        If a user accesses the successpage view, and
+        he has no sucess messages, then he should be
+        redirected to the idnex view.
+        '''
+        request = create_request(url=self.url, method='post')
+        response = addvideo(request)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual('/', response.url)
+        
+    def test_success_page_view_renders_success_page_if_there_are_success_messages(self):
+        '''
+        If a user accesses the successpage view,
+        and he has success messages,
+        'success_page.html' should be rendered.
+        '''
+        request = create_request(url=self.url, method='post')
+        messages.add_message(request, messages.INFO, 'TEST MESSAGE!')
+        with self.assertTemplateUsed('video/success_page.html'):
+            response = successpage(request)
+        
+    def test_success_page_view_returns_200_response_code_if_there_are_messages(self):
+        request = create_request(url=self.url, method='post')
+        messages.add_message(request, messages.INFO, 'TEST MESSAGE!')   
+        response = successpage(request)
+        self.assertEqual(200, response.status_code)
+           
+    
+        
+        
+        
+   
+        
         
         
         
