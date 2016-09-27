@@ -8,7 +8,7 @@ from django.contrib.auth.models import AnonymousUser, User, Permission
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib import messages
 
-from video.views import addvideo, successpage, deletevideo
+from video.views import addvideo, successpage, deletevideo, poster
 from video.models import GlossVideo
 from .basetests import BaseTest
 
@@ -204,7 +204,16 @@ class DeleteVideoTests(BaseTest):
         
             
 class PosterTests(BaseTest):
-    pass
+    def setUp(self):
+        BaseTest.setUp(self)
+        self.factory = RequestFactory()
+        # the url is irrelevant when RequestFactory is used...
+        self.url = '/poster/1/'
+        
+        def test_poster_returns_404_if_video_does_not_exist(self):
+            request = create_request(url=self.url, method='post')
+            response = poster(request, 1)
+            self.assertTrue(resonse.status_code, 404)
 
     
         

@@ -20,4 +20,4 @@ install: pip install -r requirements_test.txt
 script: coverage run --source video --omit */fields.py */convertvideo.py runtests.py
 
 after_success:
-  - codecovhttps://codecov.io/gh/hujosh/signbank-video/commit/15addb88b13250d9459457794de1973308cf771a/graphs
+  - codecov
