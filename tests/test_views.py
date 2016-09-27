@@ -14,9 +14,11 @@ from .basetests import BaseTest
 
 def create_request(url, method, data=None, permission=None):
     '''
-    This function creates one of various requests. The type
-    of request that this function creates depends on the parametres
-    of the function.
+    This function creates one of various requests. 
+    param 1 - url) url can be anything becase views are called directly.
+    param 2 - method) String, either 'get' or 'post'.
+    param 3 - data) A dictionary of data to be passed to post request.
+    param 4 - permission) String, encodes the permission of the request
     
     Call this function in a test case, and use the returned
     request object as an argument to a view. 
@@ -199,6 +201,12 @@ class DeleteVideoTests(BaseTest):
         # There should be one video
         videos =  GlossVideo.objects.all()
         self.assertEqual(len(videos), 1)
+        
+            
+class PosterTests(BaseTest):
+    pass
+
+    
         
         
         
