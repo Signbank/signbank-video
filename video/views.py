@@ -1,8 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseNotFound, HttpResponseServerError
 from django.urls import reverse
 
 from video.models import GlossVideo
@@ -67,9 +67,14 @@ def deletevideo(request, videoid):
 def poster(request, videoid):
     """Generate a still frame for a video (if needed) and
     generate a redirect to the static server for this frame"""
-    video = get_object_or_404(GlossVideo, gloss_id=videoid)
-    return redirect(video.poster_url())
-    
+    video = GlossVideo.objects.filter(gloss_id=videoid, version=0)
+    if len(video) == 0:
+        return HttpResponseNotFound()
+    # Only one video can be version 1...
+    if len(video) > 1:
+        return HttpResponseServerError()
+    else:
+        return redirect(video[0].poster_url())
     
 def video(request, videoid):
     '''

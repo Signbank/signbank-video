@@ -210,10 +210,22 @@ class PosterTests(BaseTest):
         # the url is irrelevant when RequestFactory is used...
         self.url = '/poster/1/'
         
-        def test_poster_returns_404_if_video_does_not_exist(self):
-            request = create_request(url=self.url, method='post')
-            response = poster(request, 1)
-            self.assertTrue(resonse.status_code, 404)
+    def test_poster_returns_404_if_video_does_not_exist(self):
+        request = create_request(url=self.url, method='post')
+        # No video with this gloss_is exists...
+        gloss_id = 1
+        response = poster(request, gloss_id)
+        self.assertEqual(response.status_code, 404)
+            
+    def test_poster_returns_poster_url_if_vid_exists(self):
+        request = create_request(url=self.url, method='post')
+        # First, create the video
+        gloss_id = 1
+        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        response = poster(request, gloss_id)
+        print (response)
+        self.assertEqual(response.status_code, 302)
+            
 
     
         

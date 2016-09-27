@@ -9,6 +9,7 @@ import shutil
 from django.db import models
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponseServerError
 
 from video.convertvideo import extract_frame, convert_video, ffmpeg
 
@@ -122,7 +123,7 @@ class GlossVideo(models.Model, VideoPosterMixin):
                 (newname, bak) = os.path.splitext(self.videofile.name)
                 if bak != '.bak':
                     # hmm, something bad happened
-                    raise Http500()
+                    return HttpResponseServerError()
                 self.version -= 1
         else:
             # find a name for the backup, a filename that isn't used already
