@@ -1,5 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 from video.models import GlossVideo
 from video.forms import VideoUploadForGlossForm
@@ -24,9 +28,9 @@ def addvideo(request):
                 video.reversion()
             video = GlossVideo(videofile=vfile, gloss_id=gloss_id)
             video.save()      
-            # TODO: provide some feedback that it worked (if
-            # immediate display of video isn't working)
-            return redirect(redirect_url)
+            messages.success(request, 
+                "Your video has been successfully uploaded")
+            return HttpResponseRedirect(reverse('video:successpage'))
     # if we can't process the form, just redirect back to the
     # referring page, should just be the case of hitting
     # Upload without choosing a file but could be
@@ -106,4 +110,10 @@ def iframe(request, videoid):
 '''
     
     
-    
+def successpage(request):
+    # If there is a success message to display
+    if messages.get_messages():
+        return render(request, "video/success_page.html")
+    else:
+    # If not go back to the index page
+        return redirect('/')

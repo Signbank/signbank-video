@@ -1,7 +1,6 @@
-""" 
-Models for the video application.
+'''
 keep track of uploaded videos and converted versions.
-"""
+'''
 import sys 
 import os
 import time
@@ -15,15 +14,18 @@ from video.convertvideo import extract_frame, convert_video, ffmpeg
 
 
 class VideoPosterMixin:
-    """Base class for video models that adds a method
+    '''
+    Base class for video models that adds a method
     for generating poster images
 
     Concrete class should have fields 'videofile' and 'poster'
-    """
+    '''
     def process(self):
-        """The clean method will try to validate the video
+        '''
+        The clean method will try to validate the video
         file format, optimise for streaming and generate
-        the poster image"""
+        the poster image
+        '''
 
         self.poster_path()
         #self.ensure_mp4()
@@ -34,6 +36,7 @@ class VideoPosterMixin:
         video, if create=True, create the image if needed
         Return None if create=False and the file doesn't exist
         '''
+        #( */vid, .mp4) <-- */vid.mp4
         vidpath, ext = os.path.splitext(self.videofile.path)
         poster_path = vidpath + ".jpg"
         if not os.path.exists(poster_path):

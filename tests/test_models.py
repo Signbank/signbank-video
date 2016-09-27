@@ -1,32 +1,12 @@
 import os
-import shutil
 
-from django.test import TestCase
-from django.core.files import File
 from django.conf import settings
 
 from video.models import Video, GlossVideo
+from .basetests import BaseTest
 
 
-class BaseModelTests(TestCase):
-    '''
-    This class simply defines the setUp() function
-    which is common to the VideoTests class and the
-    GlossVideoTests class.
-    '''
-    def setUp(self): 
-        # this is the path to the video used by the tests
-        self.vidfilename = os.path.join(settings.MEDIA_ROOT,'video.mp4')
-        self.videofile = File(open(self.vidfilename, "rb"), "12345.mp4")
-    
-
-class VideoTests(BaseModelTests): 
-    def tearDown(self):
-        # After each test, delete any left over files that 
-        # were created by the test
-        shutil.rmtree(os.path.join(settings.MEDIA_ROOT, settings.VIDEO_UPLOAD_LOCATION),
-            ignore_errors=True)
-    
+class VideoTests(BaseTest): 
     def test_video_create(self):
         '''
         An instance the Video model should correspond to 
@@ -49,16 +29,11 @@ class VideoTests(BaseModelTests):
         vid.delete_files()
         self.assertFalse(os.path.exists(vid.videofile.path), 
           "vidfile still exists after delete at %s" % (vid.videofile.path,))
+        # the post should also be deleted
+        self.assertEqual(vid.poster_path(create=False),None)
           
         
-class GlossVideoTests(BaseModelTests):
-    def tearDown(self):
-        # After each test, delete any left over files that 
-        # were created by the test
-        shutil.rmtree(os.path.join(settings.MEDIA_ROOT, 
-            settings.GLOSS_VIDEO_DIRECTORY),
-             ignore_errors=True)
-    
+class GlossVideoTests(BaseTest): 
     def test_GlossVideo_create(self):
         '''
         An instance of the GlossVideo model should
@@ -75,19 +50,21 @@ class GlossVideoTests(BaseModelTests):
         '''
         An instance of the GlossVideo model should
         be deletable. The file which it represents
-        should be removed from the fily system.
+        should be removed from the file system.
         '''
         vid = GlossVideo.objects.create(videofile=self.videofile) 
         vid.delete_files()
         self.assertFalse(os.path.exists(vid.videofile.path), 
             "vidfile still exists after delete at %s" % (vid.videofile.path,))
+        # the poster should also be deleted
+        self.assertEqual(vid.poster_path(create=False),None)
             
     def test_reversion_revert_is_true_one_video(self):
         '''
-        Calling reversion on a GlossVideo instance should
-        increment its version, append .bak to its name,
-        and this name change should be reflected in the
-        file system.
+        Calling reversion with rever = true on a GlossVideo 
+        instance should increment its version, append 
+        .bak to its name, and this name change should 
+        be reflected in the file system.
         '''
         # create the video
         vid = GlossVideo.objects.create(videofile=self.videofile)
@@ -97,16 +74,16 @@ class GlossVideoTests(BaseModelTests):
         self.assertEqual(vid.version, 1)
         # it's name should have .bak on the end of it
         self.assertEqual(vid.videofile.name, oldname+".bak")
+        # There should be only one file in the directory(just the video, no poster)
         videos_in_directory = os.listdir(os.path.dirname(vid.videofile.path))
         self.assertEquals(len(videos_in_directory), 1)
         self.assertTrue(os.path.exists(vid.videofile.path),
             "vidfile doesn't exist at %s" % (vid.videofile.path,))
-            
+   
     def test_reversion_revert_is_false_one_video(self):
         '''
         Calling reversion with revert = False on the the only instance of 
-        a GlossVideo with a particular name should delete it
-        from the file system
+        a GlossVideo should delete it from the file system
         '''       
         # create the video
         vid = GlossVideo.objects.create(videofile=self.videofile)
@@ -114,7 +91,9 @@ class GlossVideoTests(BaseModelTests):
         vid.reversion(revert=True)
         # The directory containing the video should be empty
         self.assertFalse(os.listdir(directory_of_video))
-           
+        
+        
+class VideoPosterMixinTests(BaseTest):
     def test_Video_poster_path(self):
         '''
         We can generate a poster image for a video
@@ -127,3 +106,10 @@ class GlossVideoTests(BaseModelTests):
         # do it again should give the same result, but won't have created the file
         poster2 = vid.poster_path()
         self.assertEqual(poster, poster2) 
+        
+    def test_poster_url(self):
+        vid = Video.objects.create(videofile=self.videofile)
+        video_url_length = len(vid.videofile.url)
+        video_ext_length = len('mp4')
+        self.assertEqual(vid.poster_url(), 
+            vid.videofile.url[:video_url_length-video_ext_length]+'jpg')
