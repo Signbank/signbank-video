@@ -178,10 +178,27 @@ class DeleteVideoTests(BaseTest):
         request = create_request(url=self.url, method='post')
         response = deletevideo(request, gloss_id)
         videos =  GlossVideo.objects.all()
-        self.assertEqual(len(videos),0)
+        self.assertEqual(len(videos), 0)
     
-        
-        
+    def test_deletevideo_reverts_video_if_more_than_one_video(self):
+        '''
+        The deletevideo view should revert the latest video
+        if there is more than one video.
+        '''
+        # First, create the video
+        gloss_id = 1
+        vid1 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        # Revert the first video manually
+        vid1.reversion()
+        # Now, create another video 
+        gloss_id = 1
+        vid2 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        # Now, delete the latest video
+        request = create_request(url=self.url, method='post')
+        response = deletevideo(request, gloss_id)
+        # There should be one video
+        videos =  GlossVideo.objects.all()
+        self.assertEqual(len(videos), 1)
         
         
         

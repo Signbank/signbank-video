@@ -21,7 +21,6 @@ def addvideo(request):
             # Let's name the video
             # ex: 3.mp4   
             vfile.name = "%s.mp4"%(gloss_id)  
-            redirect_url = form.cleaned_data['redirect']
             # deal with any existing video for this sign
             old_videos = GlossVideo.objects.filter(gloss_id=gloss_id)
             for video in old_videos:
