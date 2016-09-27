@@ -64,7 +64,7 @@ def deletevideo(request, videoid):
         url = '/'
     return redirect(url)
     
-    
+
 def poster(request, videoid):
     """Generate a still frame for a video (if needed) and
     generate a redirect to the static server for this frame"""

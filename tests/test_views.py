@@ -1,3 +1,4 @@
+# -*- coding: latin-1 -*-
 import datetime
 
 from django.test import TestCase, RequestFactory
@@ -90,6 +91,8 @@ class AddVideoTests(BaseTest):
         response = addvideo(request)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(test_referer, response.url)
+        
+        
         
         
         

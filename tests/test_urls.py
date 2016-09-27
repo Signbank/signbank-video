@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.core.urlresolvers import resolve
 
-from video.views import addvideo, deletevideo, poster, video
+from video.views import addvideo, deletevideo, poster, video, successpage
 
 
 class VideoURLs(TestCase):
@@ -37,5 +37,10 @@ class VideoURLs(TestCase):
         found = resolve('/video/1/')
         self.assertEqual(found.func, video)
         
-
-    
+    def test_success_url_resolves_to_successpage_view(self):
+        '''
+        '/success/' should be routed to the 
+        'successpage' view in 'views.py'
+        '''
+        found = resolve('/success/')
+        self.assertEqual(found.func, successpage)
