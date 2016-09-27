@@ -20,16 +20,6 @@ class VideoPosterMixin:
 
     Concrete class should have fields 'videofile' and 'poster'
     '''
-    def process(self):
-        '''
-        The clean method will try to validate the video
-        file format, optimise for streaming and generate
-        the poster image
-        '''
-
-        self.poster_path()
-        #self.ensure_mp4()
-
     def poster_path(self, create=True):
         '''
         Return the path of the poster image for this
@@ -58,22 +48,6 @@ class VideoPosterMixin:
 
     def get_absolute_url(self):
         return self.videofile.url
-
-    def ensure_mp4(self):
-        """Ensure that the video file is an h264 format
-        video, convert it if necessary"""
-
-        # convert video to use the right size and iphone/net friendly bitrate
-        # create a temporary copy in the new format
-        # then move it into place
-
-        #print "ENSURE: ", self.videofile.path
-        
-        (basename, ext) = os.path.splitext(self.videofile.path)
-        tmploc = basename + "-conv.mp4"
-        err = convert_video(self.videofile.path, tmploc, force=True)
-        #print tmploc
-        shutil.move(tmploc, self.videofile.path)
 
     def delete_files(self):
         """Delete the files associated with this object"""
