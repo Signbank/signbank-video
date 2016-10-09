@@ -123,7 +123,10 @@ class GlossVideo(models.Model, VideoPosterMixin):
                 (newname, bak) = os.path.splitext(self.videofile.name)
                 if bak != '.bak':
                     # hmm, something bad happened
-                    return HttpResponseServerError()
+                    # Refer to https://docs.djangoproject.com/en/1.10/ref/views/#the-500-server-error-view
+                    # for an explanation on how an uncaught exception gets turned into 
+                    # a 500 error by Django. 
+                    raise ValueError()
                 self.version -= 1
         else:
             # find a name for the backup, a filename that isn't used already
