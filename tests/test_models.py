@@ -93,6 +93,22 @@ class GlossVideoTests(BaseTest):
         self.assertFalse(os.listdir(directory_of_video))
         
         
+    def test_reversion_revert_is_true_ext_is_wrong(self):
+        '''
+        If the name of a video does not end in '.bak' then an
+        exception should be raised if revert = true.
+        '''
+        # create the video
+        vid = GlossVideo.objects.create(videofile=self.videofile)
+        # change the name of the video so that it's extension is wrong
+        vid.videofile.name += '.jpg'
+        # make it have a version of 1
+        vid.version = 1
+        # Now call reversion, and an exception should be thrown
+        self.assertRaises(ValueError, GlossVideo.reversion, vid, revert=True)
+
+        
+        
 class VideoPosterMixinTests(BaseTest):
     def test_Video_poster_path(self):
         '''

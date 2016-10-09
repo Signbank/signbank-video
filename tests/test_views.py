@@ -1,7 +1,7 @@
 # -*- coding: latin-1 -*-
 import datetime
 
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, override_settings
 from django.conf import settings 
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import AnonymousUser, User, Permission
@@ -190,7 +190,7 @@ class DeleteVideoTests(BaseTest):
         # First, create the video
         gloss_id = 1
         vid1 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
-        # Revert the first video manually
+        # Revert the first video 
         vid1.reversion()
         # Now, create another video 
         gloss_id = 1
@@ -202,7 +202,30 @@ class DeleteVideoTests(BaseTest):
         videos =  GlossVideo.objects.all()
         self.assertEqual(len(videos), 1)
         
-            
+        
+    # We need to turn settings.DEBUG off, otherwise an uncaught exception
+    # does not trigger the 500 response code
+    @override_settings(DEBUG=False)
+    def test_deletevideo_returns_500_response_code_if_name_of_video_does_not_end_in_dotbak(self):
+        '''
+        The deletevideo view should return a response with status code 500
+        if a video to be reverted does not end in '.bak'
+        '''
+        gloss_id = 1
+        version = 1
+        # First, create the video
+        vid1 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id, version=version)
+        # change the name to something wrong
+        vid1.videofile.name += '.jpg'
+        # Now delete the latest video
+        request = create_request(url=self.url, method='post')
+        #self.assertEqual(response.status_code, 500)
+        # We can't test for the response code 500 in the response
+        # because in the testing environment the server_error
+        # view is not called. We just check that
+        # the exception is raised. 
+        self.assertRaises(ValueError, deletevideo, request, gloss_id)
+        
 class PosterTests(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
@@ -223,15 +246,8 @@ class PosterTests(BaseTest):
         gloss_id = 1
         vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
         response = poster(request, gloss_id)
-        print (response)
         self.assertEqual(response.status_code, 302)
             
 
     
-        
-        
-        
- 
-       
-        
-     
+
