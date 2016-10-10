@@ -7,6 +7,7 @@ from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import AnonymousUser, User, Permission
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib import messages
+from django.http import HttpResponseRedirect, Http404
 
 from video.views import addvideo, successpage, deletevideo, poster
 from video.models import GlossVideo
@@ -202,10 +203,6 @@ class DeleteVideoTests(BaseTest):
         videos =  GlossVideo.objects.all()
         self.assertEqual(len(videos), 1)
         
-        
-    # We need to turn settings.DEBUG off, otherwise an uncaught exception
-    # does not trigger the 500 response code
-    @override_settings(DEBUG=False)
     def test_deletevideo_returns_500_response_code_if_name_of_video_does_not_end_in_dotbak(self):
         '''
         The deletevideo view should return a response with status code 500
@@ -237,8 +234,9 @@ class PosterTests(BaseTest):
         request = create_request(url=self.url, method='post')
         # No video with this gloss_is exists...
         gloss_id = 1
-        response = poster(request, gloss_id)
-        self.assertEqual(response.status_code, 404)
+        # The view should raise a http404 exception...
+        self.assertRaises(Http404, poster, request, gloss_id)
+ 
             
     def test_poster_returns_poster_url_if_vid_exists(self):
         request = create_request(url=self.url, method='post')
