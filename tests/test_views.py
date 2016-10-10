@@ -111,7 +111,7 @@ class SuccessPageTests(BaseTest):
         index if there are no messsages.
         '''
         request = create_request(url=self.url, method='post')
-        response = addvideo(request)
+        response = successpage(request)
         self.assertEqual(response.status_code, 302)
         self.assertEqual('/', response.url)
         
