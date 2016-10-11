@@ -67,8 +67,10 @@ def deletevideo(request, videoid):
 def poster(request, videoid):
     """Generate a still frame for a video (if needed) and
     generate a redirect to the static server for this frame"""
+    # We want the latest video associated with this gloss_id(it has version 0)
     video = get_object_or_404(GlossVideo, gloss_id=videoid, version=0)
     return redirect(video.poster_url())
+    
     
 def video(request, videoid):
     '''

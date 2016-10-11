@@ -97,6 +97,28 @@ class AddVideoTests(BaseTest):
         response = addvideo(request)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(test_referer, response.url)
+
+    def test_add_video_calls_reversion_on_existing_videos(self):
+        '''If addvideo is called for a gloss_id that already contains
+            a video, then that video should go through reversion
+        '''
+        request = create_request(url=self.url, method='post', data=self.data)
+        # First, create the video
+        gloss_id = 3
+        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        # Now, add a video via addvideo
+        response = addvideo(request)
+        print(response)
+        # There should now be two videos for the gloss_id
+        videos = GlossVideo.objects.filter(gloss_id=gloss_id).order_by('version')
+        self.assertEqual(len(videos), 2)
+        # The first video in videos has version 0
+        self.assertEqual(videos[0].version, 0)
+        # The second video in videos has version 1
+        self.assertEqual(videos[1].version ,1)
+        # The second video's name should end in.bak
+        self.assertIn('.bak', videos[1].videofile.name)
+        
        
          
 class SuccessPageTests(BaseTest):
