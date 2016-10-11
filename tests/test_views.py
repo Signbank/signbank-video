@@ -237,7 +237,6 @@ class PosterTests(BaseTest):
         # The view should raise a http404 exception...
         self.assertRaises(Http404, poster, request, gloss_id)
  
-            
     def test_poster_returns_poster_url_if_vid_exists(self):
         request = create_request(url=self.url, method='post')
         # First, create the video
@@ -245,8 +244,9 @@ class PosterTests(BaseTest):
         vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
         response = poster(request, gloss_id)
         self.assertEqual(response.status_code, 302)
-            
-            
+        self.assertEqual(response.url, vid.poster_url())
+        
+        
 class VideoTests(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
@@ -262,6 +262,7 @@ class VideoTests(BaseTest):
         vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
         response = video(request, gloss_id)
         self.assertEqual(vid.videofile.url, response.url)
+        self.assertEqual(response.status_code, 302)
         
     def test_video_exists_and_there_is_another_with_the_gloss_id(self):
         '''If two videos with the same gloss_id exist, then
@@ -277,6 +278,7 @@ class VideoTests(BaseTest):
         # The video with version 0 should have its url returned...
         response = video(request, gloss_id)
         self.assertEqual(vid2.videofile.url, response.url)
+        self.assertEqual(response.status_code, 302)
         
     def test_video_exists_and_there_is_another_with_same_version_and_gloss_id(self):
         request = create_request(url=self.url, method='get')
@@ -291,7 +293,3 @@ class VideoTests(BaseTest):
         vid.save()
         #The video view should trown an exception(500 error)
         self.assertRaises(MultipleObjectsReturned, video, request, gloss_id)
-
-        
-       
-

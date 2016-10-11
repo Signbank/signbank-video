@@ -67,18 +67,8 @@ def deletevideo(request, videoid):
 def poster(request, videoid):
     """Generate a still frame for a video (if needed) and
     generate a redirect to the static server for this frame"""
-    # Get all videos with criteria ...
-    video = GlossVideo.objects.filter(gloss_id=videoid, version=0)
-    # If no videos were found...
-    if len(video) == 0:
-        raise Http404("No poster for the video could be found")
-    # Only one video can have a version of 0
-    if len(video) > 1:
-        # Django treats this as a 500 error
-        # see -- https://docs.djangoproject.com/en/1.10/ref/views/#the-500-server-error-view
-        raise ValueError()
-    else:
-        return redirect(video[0].poster_url())
+    video = get_object_or_404(GlossVideo, gloss_id=videoid, version=0)
+    return redirect(video.poster_url())
     
 def video(request, videoid):
     '''
