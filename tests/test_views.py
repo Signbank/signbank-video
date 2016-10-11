@@ -8,8 +8,9 @@ from django.contrib.auth.models import AnonymousUser, User, Permission
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404
+from django.core.exceptions import MultipleObjectsReturned
 
-from video.views import addvideo, successpage, deletevideo, poster
+from video.views import addvideo, successpage, deletevideo, poster, video
 from video.models import GlossVideo
 from .basetests import BaseTest
 
@@ -142,7 +143,6 @@ class DeleteVideoTests(BaseTest):
         # the url is irrelevant when RequestFactory is used...
         self.url = '/delete/1/'
         
-        
     def test_deletevideo_redirects_to_index_on_successful_delete_if_no_referer(self):
         '''
         The deletevideo view should redirect to index on successful delete
@@ -185,8 +185,8 @@ class DeleteVideoTests(BaseTest):
     
     def test_deletevideo_reverts_video_if_more_than_one_video(self):
         '''
-        The deletevideo view should revert the latest video
-        if there is more than one video.
+        The deletevideo view should delete the latest video
+        and revert the second latest video.
         '''
         # First, create the video
         gloss_id = 1
@@ -246,6 +246,52 @@ class PosterTests(BaseTest):
         response = poster(request, gloss_id)
         self.assertEqual(response.status_code, 302)
             
+            
+class VideoTests(BaseTest):
+    def setUp(self):
+        BaseTest.setUp(self)
+        self.factory = RequestFactory()
+        # the url is irrelevant when RequestFactory is used...
+        self.url = '/video/1/'
+        
+    def test_video_exists_and_is_only_one_with_gloss_id(self):
+        '''If a video exists then the video view should return its url'''
+        request = create_request(url=self.url, method='get')
+        # First, create the video
+        gloss_id = 1
+        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        response = video(request, gloss_id)
+        self.assertEqual(vid.videofile.url, response.url)
+        
+    def test_video_exists_and_there_is_another_with_the_gloss_id(self):
+        '''If two videos with the same gloss_id exist, then
+           the video with version 0 should have its url returned.
+        '''
+        request = create_request(url=self.url, method='get')
+        # First, create the video
+        gloss_id = 1
+        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        vid.reversion()
+        # Now, add another video...
+        vid2 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        # The video with version 0 should have its url returned...
+        response = video(request, gloss_id)
+        self.assertEqual(vid2.videofile.url, response.url)
+        
+    def test_video_exists_and_there_is_another_with_same_version_and_gloss_id(self):
+        request = create_request(url=self.url, method='get')
+        # First, create the video
+        gloss_id = 1
+        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        vid.reversion()
+        # Now, add another video...
+        vid2 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        # Set the first video's version to 0. Now both have version 0...
+        vid.version = 0
+        vid.save()
+        #The video view should trown an exception(500 error)
+        self.assertRaises(MultipleObjectsReturned, video, request, gloss_id)
 
-    
+        
+       
 

@@ -84,7 +84,8 @@ def video(request, videoid):
     '''
     Redirect to the video url for this videoid
     '''
-    video = get_object_or_404(GlossVideo, gloss_id=videoid)
+    # We want the latest video associated with this gloss_id (it has version 0)
+    video = get_object_or_404(GlossVideo, gloss_id=videoid, version=0)
     return redirect(video)
 
 

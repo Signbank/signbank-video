@@ -144,5 +144,5 @@ class GlossVideo(models.Model, VideoPosterMixin):
         self.videofile.name = newname
         self.save()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.videofile.name
