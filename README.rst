@@ -30,6 +30,41 @@ Install signbank-video::
 Then use it in a project::
 
     import video
+    
+You must define the following variables in ``settings.py``:
+
+* ``FFMPEG_PROGRAM = "/usr/bin/ffmpeg``
+* ``FFMPEG_TIMEOUT = 60``
+* ``FFMPEG_OPTIONS = ["-vcodec", "h264", "-an"]``   
+* ``VIDEO_ASPECT_RATIO = 3.0/4.0``
+    
+
+These variables control ``ffmpeg``, a program that the video app requires
+and uses for extracting a frame from a video (a frame is a thumbnail).     
+You can download it here: https://www.ffmpeg.org/download.html.
+The value of ``FFMPEG_PROGRAM`` on my system is ``/usr/bin/ffmpeg``, but on
+your system it might be different; it all depends on where the installer puts
+the ``ffmpeg`` executable.
+
+Your must also define these following variables in ``settings.py``
+
+* ``VIDEO_UPLOAD_LOCATION = "upload"``
+* ``GLOSS_VIDEO_DIRECTORY = "video"``
+* ``MEDIA_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+``MEDIA_ROOT`` is the root directory for your media, so for the video app it's the
+root directory for all of the videos. ``VIDEO_UPLOAD_LOCATION``, and 
+``GLOSS_VIDEO_DIRECTORY`` are directories inside of ``MEDIA_ROOT`` that contain
+user uploaded videos, and videos of each sign, respectively.
+
+You must also define these following variables in ``settings.py``:
+
+* ``LANGUAGE_NAME = "Auslan"``
+* ``COUNTRY_NAME = "Australia"``
+* ``SITE_TITLE = "Signbank"``
+
+Finally, you must also add ``video`` to the ``INSTALLED_APPS`` variable of
+``settings.py``.
 
 Features
 --------
