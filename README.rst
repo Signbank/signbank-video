@@ -50,7 +50,7 @@ Your must also define these following variables in ``settings.py``:
 
 * ``VIDEO_UPLOAD_LOCATION = "upload"``
 * ``GLOSS_VIDEO_DIRECTORY = "video"``
-* ``MEDIA_ROOT = os.path.dirname(os.path.abspath(__file__))``
+* ``MEDIA_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), media)``
 
 ``MEDIA_ROOT`` is the root directory for your media, so for the video app it's the
 root directory for all of the videos. ``VIDEO_UPLOAD_LOCATION``, and 
