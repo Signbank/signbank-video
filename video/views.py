@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render_to_response
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
+from django.conf import settings
 
 from video.models import GlossVideo
 from video.forms import VideoUploadForGlossForm
@@ -16,18 +17,18 @@ def addvideo(request):
     if request.method == 'POST':
         form = VideoUploadForGlossForm(request.POST, request.FILES)
         if form.is_valid():
-            gloss_id = form.cleaned_data['gloss_id']            
+            gloss_id = form.cleaned_data['gloss_id']
             vfile = form.cleaned_data['videofile']
             # Let's name the video
-            # ex: 3.mp4   
-            vfile.name = "%s.mp4"%(gloss_id)  
+            # ex: 3.mp4
+            vfile.name = "%s.mp4"%(gloss_id)
             # deal with any existing video for this sign
             old_videos = GlossVideo.objects.filter(gloss_id=gloss_id)
             for video in old_videos:
                 video.reversion()
             video = GlossVideo(videofile=vfile, gloss_id=gloss_id)
-            video.save()      
-            messages.success(request, 
+            video.save()
+            messages.success(request,
                 "Your video has been successfully uploaded")
             return HttpResponseRedirect(reverse('video:successpage'))
     # if we can't process the form, just redirect back to the
@@ -39,8 +40,8 @@ def addvideo(request):
     else:
         url = '/'
     return redirect(url)
-    
-    
+
+
 @login_required
 def deletevideo(request, videoid):
     '''
@@ -62,7 +63,7 @@ def deletevideo(request, videoid):
     else:
         url = '/'
     return redirect(url)
-    
+
 
 def poster(request, videoid):
     """Generate a still frame for a video (if needed) and
@@ -70,8 +71,8 @@ def poster(request, videoid):
     # We want the latest video associated with this gloss_id(it has version 0)
     video = get_object_or_404(GlossVideo, gloss_id=videoid, version=0)
     return redirect(video.poster_url())
-    
-    
+
+
 def video(request, videoid):
     '''
     Redirect to the video url for this videoid
@@ -83,34 +84,34 @@ def video(request, videoid):
 
 # TODO talk to steve about this one
 # Instead of initiating looking for the gloss here, initiate it
-# in the dictionary app, and when it's found, look for its video here.      
-'''
+# in the dictionary app, and when it's found, look for its video here.
+
 def iframe(request, videoid):
-    """Generate an iframe with a player for this video"""    
+    """Generate an iframe with a player for this video"""
+
     try:
         #gloss = Gloss.objects.get(pk=videoid)
         #glossvideo = gloss.get_video()
-        
+
         if django_mobile.get_flavour(request) == 'mobile':
             videourl = glossvideo.get_mobile_url()
         else:
             videourl = glossvideo.get_absolute_url()
-                
+
         posterurl = glossvideo.poster_url()
     except:
         gloss = None
         glossvideo = None
         videourl = None
         posterurl = None
-    return render_to_response("iframe.html",
+    return render_to_response("video/iframe.html",
                               {'videourl': videourl,
                                'posterurl': posterurl,
                                'aspectRatio': settings.VIDEO_ASPECT_RATIO,
-                               },
-                               context_instance=RequestContext(request))
-'''
-    
-    
+                               })
+
+
+
 def successpage(request):
     # If there is a success message to display
     if messages.get_messages(request):
