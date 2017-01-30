@@ -1,10 +1,11 @@
 from django.contrib import admin
 
-from video.models import Video, GlossVideo 
+from video.models import TaggedVideo, Video
 
+class VideoAdmin(admin.TabularInline):
+    model = Video
 
-class GlossVideoAdmin(admin.ModelAdmin):
-    search_fields = ['^gloss']
-    
-    
-admin.site.register(GlossVideo, GlossVideoAdmin)
+@admin.register(TaggedVideo)
+class TaggedVideoAdmin(admin.ModelAdmin):
+    search_fields = ['^tag']
+    inlines = [VideoAdmin]

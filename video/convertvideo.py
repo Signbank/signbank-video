@@ -15,11 +15,11 @@ except:
     FFMPEG_PROGRAM = "/Applications/ffmpegX.app/Contents/Resources/ffmpeg"
     #FFMPEG_OPTIONS = ["-vcodec", "libx264", "-an", "-vpre", "hq", "-crf", "22", "-threads", "0"]
     FFMPEG_OPTIONS = ["-vcodec", "h264", "-an"]
-    
-    
+
+
 def parse_ffmpeg_output(text):
     """Get relevant info from the ffmpeg output"""
-    
+
     state = None
     result = {'input': '', 'output': ''}
     for line in text.split('\n'):
@@ -28,39 +28,39 @@ def parse_ffmpeg_output(text):
         elif line.startswith("Output"):
             state = "OUTPUT"
         elif line.startswith("Stream mapping:"):
-            state = "OTHER"    
+            state = "OTHER"
         if state == "INPUT":
             result['input'] += line + "\n"
 
         if state == "OUTPUT":
-            result['output'] += line + "\n"           
+            result['output'] += line + "\n"
     # check for video input format
     m = re.search("Video: ([^,]+),", result['input'])
     if m:
         result['inputvideoformat'] = m.groups()[0]
     else:
-        result['inputvideoformat'] = 'unknown'       
+        result['inputvideoformat'] = 'unknown'
     return result
-            
-    
+
+
 def ffmpeg(sourcefile, targetfile, timeout=60, options=[]):
     """Run FFMPEG with some command options, returning the output"""
 
     errormsg = ""
-    
+
     ffmpeg = [FFMPEG_PROGRAM, "-y", "-i", sourcefile]
     ffmpeg += options
     ffmpeg += [targetfile]
-    #print " ".join(ffmpeg)   
+    #print(" ".join(ffmpeg))  
     process =  Popen(ffmpeg, stdout=PIPE, stderr=PIPE)
-    start = time.time()  
-    while process.poll() == None: 
+    start = time.time()
+    while process.poll() == None:
         if time.time()-start > timeout:
-            # we've gone over time, kill the process  
+            # we've gone over time, kill the process
             os.kill(process.pid, signal.SIGKILL)
             print ("Killing ffmpeg process for %s"%(sourcefile))
             errormsg = "Conversion of video took too long.  This site is only able to host relatively short videos."
-            return errormsg      
+            return errormsg
     status = process.poll()
     out,err = process.communicate()
     # should check status
@@ -68,9 +68,9 @@ def ffmpeg(sourcefile, targetfile, timeout=60, options=[]):
     return err
 
 def extract_frame(sourcefile, targetfile):
-    """Extract a single frame from the source video and 
+    """Extract a single frame from the source video and
     write it to the target file"""
-    options = ["-r", "1", "-f", "mjpeg"] 
+    options = ["-r", "1", "-f", "mjpeg"]
     err = ffmpeg(sourcefile, targetfile, options=options)
 
 
@@ -92,27 +92,27 @@ def convert_video(sourcefile, targetfile, force=False):
         format = probe_format(sourcefile)
     else:
         format = 'force'
-    
+
     if format == "h264":
         # just do a copy of the file
-        shutil.copy(sourcefile, targetfile) 
-    else: 
+        shutil.copy(sourcefile, targetfile)
+    else:
         # convert the video
         b = ffmpeg(sourcefile, targetfile, options=FFMPEG_OPTIONS)
     format = probe_format(targetfile)
     if format == 'h264':
         return True
     else:
-        return False 
-        
-        
+        return False
+
+
 if __name__=='__main__':
     import sys
-    
-       
+
+
     if len(sys.argv) != 3:
         print ("Usage: convertvideo.py <sourcefile> <targetfile>")
-        exit()      
+        exit()
     sourcefile = sys.argv[1]
-    targetfile = sys.argv[2]    
+    targetfile = sys.argv[2]
     convert_video(sourcefile, targetfile)

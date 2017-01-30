@@ -1,0 +1,13 @@
+<form action="{% url 'video:videolist' %}" method="post" enctype="multipart/form-data" id="video_upload_form">
+  {% csrf_token %}
+<table>
+  <tr>
+      {{form}}
+  </tr>
+  <tr>
+      <td>
+          <input class='btn btn-primary' type='submit' value='Upload Video'/>
+      </td>
+  </tr>
+</table>
+</form>

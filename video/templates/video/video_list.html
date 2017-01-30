@@ -1,0 +1,12 @@
+{% extends "baselayout.html" %}
+
+{% block title %}Video List{% endblock %}
+
+{% block content %}
+<h2>Videos</h2>
+<ul>
+{% for video in object_list %}
+    <li><a href="{% url 'video:video' videoid=video.tag %}">{{video.tag}} ({{video.version}})</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

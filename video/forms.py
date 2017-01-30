@@ -1,19 +1,16 @@
 from django import forms
 
-from video.models import Video, GlossVideo
+from video.models import TaggedVideo
 
-# we'll fix this later
-'''
-class VideoUploadForm(forms.ModelForm):
-    """Form for video upload"""
-    class Meta:
-        model = GlossVideo
-'''     
-     
-        
-class VideoUploadForGlossForm(forms.Form):
-    """Form for video upload for a particular gloss"""
+class VideoUploadForm(forms.Form):
+    """Form for video upload with a hidden field for the tag"""
     videofile = forms.FileField(label="Upload Video")
-    gloss_id = forms.CharField(widget=forms.HiddenInput)
+    tag = forms.CharField(widget=forms.HiddenInput)
     redirect = forms.CharField(widget=forms.HiddenInput, required=False)
-    
+
+
+class VideoUploadTagForm(forms.Form):
+    """Form for video upload including the tag field"""
+    videofile = forms.FileField(label="Upload Video")
+    tag = forms.CharField()
+    redirect = forms.CharField(widget=forms.HiddenInput, required=False)

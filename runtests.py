@@ -25,14 +25,14 @@ try:
         ],
         SITE_ID=1,
         MIDDLEWARE_CLASSES=(),
-        
+
         TEMPLATES = [
           {
           'BACKEND': 'django.template.backends.django.DjangoTemplates',
                   'DIRS': [os.path.join((os.path.dirname(os.path.abspath(__file__))),
                         'tests', 'templates'),
             # insert your TEMPLATE_DIRS here
-            
+
           ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -59,16 +59,16 @@ try:
           "tests", "testmedia"),
         VIDEO_UPLOAD_LOCATION = "upload",
         GLOSS_VIDEO_DIRECTORY = "video",
-        
-        FFMPEG_PROGRAM = "/usr/bin/ffmpeg",
+
+        FFMPEG_PROGRAM = "/usr/local/bin/ffmpeg",
         FFMPEG_TIMEOUT = 60,
         FFMPEG_OPTIONS = ["-vcodec", "h264", "-an"],
-        
+
 
 
         # defines the aspect ratio for videos
         VIDEO_ASPECT_RATIO = 3.0/4.0
-        
+
     )
 
     try:

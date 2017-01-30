@@ -11,7 +11,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.core.exceptions import MultipleObjectsReturned
 
 from video.views import addvideo, successpage, deletevideo, poster, video
-from video.models import GlossVideo
+from video.models import TaggedVideo
 from .basetests import BaseTest
 
 def create_request(url, method, data=None, permission=None):
@@ -64,7 +64,7 @@ class AddVideoTests(BaseTest):
         # the url is irrelevant when RequestFactory is used...
         self.url = '/addvideo/'
         self.success_url = '/success/'
-        self.data = {"gloss_id" : "3", "videofile" : self.videofile}
+        self.data = {"tag" : "3", "videofile" : self.videofile}
         
     def test_add_video_view_redirects_to_success_page_after_successful_request(self):
         '''
@@ -99,18 +99,18 @@ class AddVideoTests(BaseTest):
         self.assertEqual(test_referer, response.url)
 
     def test_add_video_calls_reversion_on_existing_videos(self):
-        '''If addvideo is called for a gloss_id that already contains
+        '''If addvideo is called for a tag that already contains
             a video, then that video should go through reversion
         '''
         request = create_request(url=self.url, method='post', data=self.data)
         # First, create the video
-        gloss_id = 3
-        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        tag = 3
+        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
         # Now, add a video via addvideo
         response = addvideo(request)
         print(response)
-        # There should now be two videos for the gloss_id
-        videos = GlossVideo.objects.filter(gloss_id=gloss_id).order_by('version')
+        # There should now be two videos for the tag
+        videos = TaggedVideo.objects.filter(tag=tag).order_by('version')
         self.assertEqual(len(videos), 2)
         # The first video in videos has version 0
         self.assertEqual(videos[0].version, 0)
@@ -171,10 +171,10 @@ class DeleteVideoTests(BaseTest):
         if there is no referer.
         '''
         # First, create the video
-        gloss_id = 1
-        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        tag = 1
+        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
         request = create_request(url=self.url, method='post')
-        response = deletevideo(request, gloss_id)
+        response = deletevideo(request, tag)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/')
    
@@ -184,12 +184,12 @@ class DeleteVideoTests(BaseTest):
         it's given and on success.
         '''
         # First, create the video
-        gloss_id = 1
-        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        tag = 1
+        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
         request = create_request(url=self.url, method='post')
         referer_test = '/test/test'
         request.META['HTTP_REFERER'] = referer_test
-        response = deletevideo(request, gloss_id)
+        response = deletevideo(request, tag)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, referer_test)
         
@@ -198,11 +198,11 @@ class DeleteVideoTests(BaseTest):
         The deletevideo view should delete the video
         '''
         # First, create the video
-        gloss_id = 1
-        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        tag = 1
+        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
         request = create_request(url=self.url, method='post')
-        response = deletevideo(request, gloss_id)
-        videos =  GlossVideo.objects.all()
+        response = deletevideo(request, tag)
+        videos =  TaggedVideo.objects.all()
         self.assertEqual(len(videos), 0)
     
     def test_deletevideo_reverts_video_if_more_than_one_video(self):
@@ -211,18 +211,18 @@ class DeleteVideoTests(BaseTest):
         and revert the second latest video.
         '''
         # First, create the video
-        gloss_id = 1
-        vid1 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        tag = 1
+        vid1 = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
         # Revert the first video 
         vid1.reversion()
         # Now, create another video 
-        gloss_id = 1
-        vid2 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        tag = 1
+        vid2 = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
         # Now, delete the latest video
         request = create_request(url=self.url, method='post')
-        response = deletevideo(request, gloss_id)
+        response = deletevideo(request, tag)
         # There should be one video
-        videos =  GlossVideo.objects.all()
+        videos =  TaggedVideo.objects.all()
         self.assertEqual(len(videos), 1)
         
     def test_deletevideo_returns_500_response_code_if_name_of_video_does_not_end_in_dotbak(self):
@@ -230,10 +230,10 @@ class DeleteVideoTests(BaseTest):
         The deletevideo view should return a response with status code 500
         if a video to be reverted does not end in '.bak'
         '''
-        gloss_id = 1
+        tag = 1
         version = 1
         # First, create the video
-        vid1 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id, version=version)
+        vid1 = TaggedVideo.objects.create(videofile=self.videofile, tag=tag, version=version)
         # change the name to something wrong
         vid1.videofile.name += '.jpg'
         # Now delete the latest video
@@ -243,7 +243,7 @@ class DeleteVideoTests(BaseTest):
         # because in the testing environment the server_error
         # view is not called. We just check that
         # the exception is raised. 
-        self.assertRaises(ValueError, deletevideo, request, gloss_id)
+        self.assertRaises(ValueError, deletevideo, request, tag)
         
 class PosterTests(BaseTest):
     def setUp(self):
@@ -255,16 +255,16 @@ class PosterTests(BaseTest):
     def test_poster_returns_404_if_video_does_not_exist(self):
         request = create_request(url=self.url, method='post')
         # No video with this gloss_is exists...
-        gloss_id = 1
+        tag = 1
         # The view should raise a http404 exception...
-        self.assertRaises(Http404, poster, request, gloss_id)
+        self.assertRaises(Http404, poster, request, tag)
  
     def test_poster_returns_poster_url_if_vid_exists(self):
         request = create_request(url=self.url, method='post')
         # First, create the video
-        gloss_id = 1
-        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
-        response = poster(request, gloss_id)
+        tag = 1
+        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
+        response = poster(request, tag)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, vid.poster_url())
         
@@ -276,42 +276,42 @@ class VideoTests(BaseTest):
         # the url is irrelevant when RequestFactory is used...
         self.url = '/video/1/'
         
-    def test_video_exists_and_is_only_one_with_gloss_id(self):
+    def test_video_exists_and_is_only_one_with_tag(self):
         '''If a video exists then the video view should return its url'''
         request = create_request(url=self.url, method='get')
         # First, create the video
-        gloss_id = 1
-        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
-        response = video(request, gloss_id)
+        tag = 1
+        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
+        response = video(request, tag)
         self.assertEqual(vid.videofile.url, response.url)
         self.assertEqual(response.status_code, 302)
         
-    def test_video_exists_and_there_is_another_with_the_gloss_id(self):
-        '''If two videos with the same gloss_id exist, then
+    def test_video_exists_and_there_is_another_with_the_tag(self):
+        '''If two videos with the same tag exist, then
            the video with version 0 should have its url returned.
         '''
         request = create_request(url=self.url, method='get')
         # First, create the video
-        gloss_id = 1
-        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        tag = 1
+        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
         vid.reversion()
         # Now, add another video...
-        vid2 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        vid2 = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
         # The video with version 0 should have its url returned...
-        response = video(request, gloss_id)
+        response = video(request, tag)
         self.assertEqual(vid2.videofile.url, response.url)
         self.assertEqual(response.status_code, 302)
         
-    def test_video_exists_and_there_is_another_with_same_version_and_gloss_id(self):
+    def test_video_exists_and_there_is_another_with_same_version_and_tag(self):
         request = create_request(url=self.url, method='get')
         # First, create the video
-        gloss_id = 1
-        vid = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        tag = 1
+        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
         vid.reversion()
         # Now, add another video...
-        vid2 = GlossVideo.objects.create(videofile=self.videofile, gloss_id=gloss_id)
+        vid2 = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
         # Set the first video's version to 0. Now both have version 0...
         vid.version = 0
         vid.save()
         #The video view should trown an exception(500 error)
-        self.assertRaises(MultipleObjectsReturned, video, request, gloss_id)
+        self.assertRaises(MultipleObjectsReturned, video, request, tag)
