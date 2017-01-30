@@ -1,0 +1,22 @@
+{% extends "baselayout.html" %}
+{% load videotags %}
+
+{% block title %}Signbank Video Test{% endblock %}
+
+{% block content %}
+<h1>Signbank Video Test App</h1>
+
+{% for message in messages %}
+    <div class="alert fade">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ message|safe }}
+    </div>
+{% endfor %}
+
+{% uploadform redirect='/' %}
+
+<ul>
+    <li><a href="{% url 'video:videolist' %}">List Videos</a></li>
+</ul>
+
+{% endblock %}
