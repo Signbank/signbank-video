@@ -21,13 +21,12 @@ def uploadform(identifier=None, redirect='/'):
     }
 
 @register.inclusion_tag("video/player.html")
-def videoplayer(elementid, posterurl, videourl):
+def videoplayer(elementid, video):
     """
     Generate an HTML video player for this video
     """
 
     return {
         'elementid': elementid,
-        'posterurl': posterurl,
-        'videourl': videourl,
+        'video': video
     }

@@ -1,12 +1,19 @@
 {% extends "baselayout.html" %}
+{% load videotags %}
 
 {% block title %}Video List{% endblock %}
 
 {% block content %}
 <h2>Videos</h2>
-<ul>
+
 {% for video in object_list %}
-    <li><a href="{% url 'video:video' videoid=video.tag %}">{{video.tag}} ({{video.version}})</a></li>
+    <div class='video'>
+        {% videoplayer elementid=video.tag video=video %}
+
+        <p class='caption' style='margin-top: 3em'>
+            <a href="{% url 'video:video' tag=video.tag %}">{{video.tag}}</a> ({{video.versions}} versions)
+        </p>
+    </div>
 {% endfor %}
 </ul>
 {% endblock %}

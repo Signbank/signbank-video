@@ -28,7 +28,7 @@ class VideoList(ListView):
             # ex: 3.mp4
             vfile.name = "%s.mp4" % (tag,)
 
-            tagvid = TaggedVideo.objects.addvideo(tag, vfile)
+            tagvid = TaggedVideo.objects.add(tag, vfile)
 
             messages.success(request,
                 "Your video has been successfully uploaded")
@@ -41,16 +41,15 @@ class VideoList(ListView):
             return redirect(url)
 
 
-def video(request, videoid):
+def video(request, tag):
     '''
-    Redirect to the video url for this videoid
+    Redirect to the video url for this tag
     '''
-    # We want the latest video associated with this tag (it has version 0)
-    video = get_object_or_404(TaggedVideo, tag=videoid, version=0)
-    return redirect(video)
+    taggedvideo = get_object_or_404(TaggedVideo, tag=tag)
+    return redirect(taggedvideo.get_absolute_url())
 
 @login_required
-def deletevideo(request, videoid):
+def deletevideo(request, tag):
     '''
     Remove the video for this gloss, if there is an older version
     then reinstate that as the current video (act like undo)

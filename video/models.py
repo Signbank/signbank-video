@@ -48,6 +48,9 @@ class TaggedVideo(models.Model):
     def get_absolute_url(self):
         return self.video.get_absolute_url()
 
+    def poster_url(self):
+        return self.video.poster_url()
+
     def versions(self):
         """Return a count of the number of versions
         of videos for this tag"""
@@ -102,6 +105,9 @@ class Video(models.Model):
 
     # video version, most recent is 0
     version = models.IntegerField("Version", default=0)
+
+    def get_absolute_url(self):
+        return self.videofile.url
 
     def __poster_path(self, create=True):
         '''
