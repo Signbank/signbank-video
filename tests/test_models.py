@@ -13,7 +13,7 @@ class TaggedVideoTests(BaseTest):
         The add method on the taggedvideo manager creates a new
         object when none already exists for this tag"""
 
-        vid = TaggedVideo.objects.add(tag="hello", videofile=self.videofile1)
+        vid = TaggedVideo.objects.add(category="test", tag="hello", videofile=self.videofile1)
 
         self.assertEqual("hello", vid.tag)
         self.assertEqual(0, vid.video.version)
@@ -23,8 +23,8 @@ class TaggedVideoTests(BaseTest):
         The add method on the taggedvideo manager adds a new
         version of a video if one already exists"""
 
-        vid1 = TaggedVideo.objects.add(tag="hello", videofile=self.videofile1)
-        vid2 = TaggedVideo.objects.add(tag="hello", videofile=self.videofile2)
+        vid1 = TaggedVideo.objects.add(category="test", tag="hello", videofile=self.videofile1)
+        vid2 = TaggedVideo.objects.add(category="test", tag="hello", videofile=self.videofile2)
 
         self.assertEqual("hello", vid1.tag)
         self.assertEqual(0, vid1.video.version)
@@ -42,8 +42,8 @@ class TaggedVideoTests(BaseTest):
         The revert method removes the most recent
         video"""
 
-        vid1 = TaggedVideo.objects.add(tag="hello", videofile=self.videofile1)
-        vid2 = TaggedVideo.objects.add(tag="hello", videofile=self.videofile2)
+        vid1 = TaggedVideo.objects.add(category="test", tag="hello", videofile=self.videofile1)
+        vid2 = TaggedVideo.objects.add(category="test", tag="hello", videofile=self.videofile2)
 
         self.assertTrue(vid2.revert())
         self.assertEqual(os.path.basename(vid1.video.videofile.name), self.videofile1.name)
@@ -57,7 +57,7 @@ class TaggedVideoTests(BaseTest):
         '''
         We can generate a poster image for a video
         '''
-        vid = TaggedVideo.objects.add(tag="hello", videofile=self.videofile1)
+        vid = TaggedVideo.objects.add(category="test", tag="hello", videofile=self.videofile1)
 
         poster = vid.video.poster_url()
         poster_abs = settings.MEDIA_ROOT + poster

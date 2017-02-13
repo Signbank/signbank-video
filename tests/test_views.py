@@ -64,17 +64,21 @@ class AddVideoTests(BaseTest):
         # the url is irrelevant when RequestFactory is used...
         self.url = '/addvideo/'
         self.success_url = '/success/'
-        self.data = {"tag" : "3", "videofile" : self.videofile}
+        self.data = {"tag" : "3",
+                     "category": self.category,
+                     "videofile" : self.videofile1,
+                     "redirect": '/redirect'
+                     }
 
-    def test_add_video_view_redirects_to_success_page_after_successful_request(self):
+    def test_add_video_view_redirects_after_successful_request(self):
         '''
         The add video view should redirect
-        to the success view on succecssful upload of a video.
+        to the given redirect url
         '''
         request = create_request(url=self.url, method='post', data=self.data)
         response = VideoList.as_view()(request)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(reverse('video:successpage'),response.url)
+        self.assertEqual(self.data['redirect'], response.url)
 
     def test_add_view_redirects_to_index_if_no_video_uploaded(self):
         '''
@@ -98,72 +102,27 @@ class AddVideoTests(BaseTest):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(test_referer, response.url)
 
-    def test_add_video_calls_reversion_on_existing_videos(self):
+    def test_add_video_calls_revert_on_existing_videos(self):
         '''If addvideo is called for a tag that already contains
-            a video, then that video should go through reversion
+            a video, then that video should go through revert
         '''
         request = create_request(url=self.url, method='post', data=self.data)
         # First, create the video
         tag = 3
-        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
+        vid = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
         # Now, add a video via addvideo
         response = VideoList.as_view()(request)
-        print(response)
+
         # There should now be two videos for the tag
-        videos = TaggedVideo.objects.filter(tag=tag).order_by('version')
-        self.assertEqual(len(videos), 2)
-        # The first video in videos has version 0
-        self.assertEqual(videos[0].version, 0)
-        # The second video in videos has version 1
-        self.assertEqual(videos[1].version ,1)
-        # The second video's name should end in.bak
-        self.assertIn('.bak', videos[1].videofile.name)
+        self.assertEqual(2, vid.versions())
 
-
-
-class SuccessPageTests(BaseTest):
-    def setUp(self):
-        BaseTest.setUp(self)
-        self.factory = RequestFactory()
-        # the url is irrelevant when RequestFactory is used...
-        self.url = '/success/'
-
-    def test_success_page_view_redirects_to_index_if_no_success_messages(self):
-        '''
-        The successpage view should redirect to
-        index if there are no messsages.
-        '''
-        request = create_request(url=self.url, method='post')
-        response = successpage(request)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual('/', response.url)
-
-    def test_success_page_view_renders_success_page_if_there_are_success_messages(self):
-        '''
-        The successpage view should render 'vide/success_page.html'
-        if there are messages.
-        '''
-        request = create_request(url=self.url, method='post')
-        messages.add_message(request, messages.INFO, 'TEST MESSAGE!')
-        with self.assertTemplateUsed('video/success_page.html'):
-            response = successpage(request)
-
-    def test_success_page_view_returns_200_response_code_if_there_are_messages(self):
-        '''
-        The successpage view should return a response code of
-        200 if there are messages.
-        '''
-        request = create_request(url=self.url, method='post')
-        messages.add_message(request, messages.INFO, 'TEST MESSAGE!')
-        response = successpage(request)
-        self.assertEqual(200, response.status_code)
 
 class DeleteVideoTests(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
         self.factory = RequestFactory()
         # the url is irrelevant when RequestFactory is used...
-        self.url = '/delete/1/'
+        self.url = reverse('video:delete', kwargs={'category': self.category, 'tag': 1})
 
     def test_deletevideo_redirects_to_index_on_successful_delete_if_no_referer(self):
         '''
@@ -172,9 +131,9 @@ class DeleteVideoTests(BaseTest):
         '''
         # First, create the video
         tag = 1
-        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
+        vid = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
         request = create_request(url=self.url, method='post')
-        response = deletevideo(request, tag)
+        response = deletevideo(request, self.category, tag)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/')
 
@@ -185,11 +144,11 @@ class DeleteVideoTests(BaseTest):
         '''
         # First, create the video
         tag = 1
-        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
+        vid = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
         request = create_request(url=self.url, method='post')
         referer_test = '/test/test'
         request.META['HTTP_REFERER'] = referer_test
-        response = deletevideo(request, tag)
+        response = deletevideo(request, self.category, tag)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, referer_test)
 
@@ -199,11 +158,12 @@ class DeleteVideoTests(BaseTest):
         '''
         # First, create the video
         tag = 1
-        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
+        vid = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
+        self.assertEqual(1, vid.versions())
         request = create_request(url=self.url, method='post')
-        response = deletevideo(request, tag)
-        videos =  TaggedVideo.objects.all()
-        self.assertEqual(len(videos), 0)
+        response = deletevideo(request, self.category, tag)
+        vids = TaggedVideo.objects.filter(tag=tag, category=self.category)
+        self.assertEqual(0, vids.count())
 
     def test_deletevideo_reverts_video_if_more_than_one_video(self):
         '''
@@ -212,38 +172,18 @@ class DeleteVideoTests(BaseTest):
         '''
         # First, create the video
         tag = 1
-        vid1 = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
+        vid1 = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
         # Revert the first video
-        vid1.reversion()
+        vid1.revert()
         # Now, create another video
         tag = 1
-        vid2 = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
+        vid2 = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
         # Now, delete the latest video
         request = create_request(url=self.url, method='post')
-        response = deletevideo(request, tag)
+        response = deletevideo(request, self.category, tag)
         # There should be one video
         videos =  TaggedVideo.objects.all()
         self.assertEqual(len(videos), 1)
-
-    def test_deletevideo_returns_500_response_code_if_name_of_video_does_not_end_in_dotbak(self):
-        '''
-        The deletevideo view should return a response with status code 500
-        if a video to be reverted does not end in '.bak'
-        '''
-        tag = 1
-        version = 1
-        # First, create the video
-        vid1 = TaggedVideo.objects.create(videofile=self.videofile, tag=tag, version=version)
-        # change the name to something wrong
-        vid1.videofile.name += '.jpg'
-        # Now delete the latest video
-        request = create_request(url=self.url, method='post')
-        #self.assertEqual(response.status_code, 500)
-        # We can't test for the response code 500 in the response
-        # because in the testing environment the server_error
-        # view is not called. We just check that
-        # the exception is raised.
-        self.assertRaises(ValueError, deletevideo, request, tag)
 
 class PosterTests(BaseTest):
     def setUp(self):
@@ -257,14 +197,14 @@ class PosterTests(BaseTest):
         # No video with this gloss_is exists...
         tag = 1
         # The view should raise a http404 exception...
-        self.assertRaises(Http404, poster, request, tag)
+        self.assertRaises(Http404, poster, request, self.category, tag)
 
     def test_poster_returns_poster_url_if_vid_exists(self):
         request = create_request(url=self.url, method='post')
         # First, create the video
         tag = 1
-        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
-        response = poster(request, tag)
+        vid = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
+        response = poster(request, self.category, tag)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, vid.poster_url())
 
@@ -281,9 +221,9 @@ class VideoTests(BaseTest):
         request = create_request(url=self.url, method='get')
         # First, create the video
         tag = 1
-        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
-        response = video(request, tag)
-        self.assertEqual(vid.videofile.url, response.url)
+        vid = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
+        response = video(request, self.category, tag)
+        self.assertEqual(vid.get_absolute_url(), response.url)
         self.assertEqual(response.status_code, 302)
 
     def test_video_exists_and_there_is_another_with_the_tag(self):
@@ -293,25 +233,11 @@ class VideoTests(BaseTest):
         request = create_request(url=self.url, method='get')
         # First, create the video
         tag = 1
-        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
-        vid.reversion()
+        vid = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
+        vid.revert()
         # Now, add another video...
-        vid2 = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
+        vid2 = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
         # The video with version 0 should have its url returned...
-        response = video(request, tag)
-        self.assertEqual(vid2.videofile.url, response.url)
+        response = video(request, self.category, tag)
+        self.assertEqual(vid2.get_absolute_url(), response.url)
         self.assertEqual(response.status_code, 302)
-
-    def test_video_exists_and_there_is_another_with_same_version_and_tag(self):
-        request = create_request(url=self.url, method='get')
-        # First, create the video
-        tag = 1
-        vid = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
-        vid.reversion()
-        # Now, add another video...
-        vid2 = TaggedVideo.objects.create(videofile=self.videofile, tag=tag)
-        # Set the first video's version to 0. Now both have version 0...
-        vid.version = 0
-        vid.save()
-        #The video view should trown an exception(500 error)
-        self.assertRaises(MultipleObjectsReturned, video, request, tag)

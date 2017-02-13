@@ -1,6 +1,8 @@
 from django.template import Library
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 
+from video.models import TaggedVideo
 from video.forms import VideoUploadForm, VideoUploadTagForm
 
 register = Library()
@@ -21,10 +23,12 @@ def uploadform(identifier=None, redirect='/'):
     }
 
 @register.inclusion_tag("video/player.html")
-def videoplayer(elementid, video):
+def videoplayer(elementid, category, tag):
     """
-    Generate an HTML video player for this video
+    Generate an HTML video player for a video given the category and tag
     """
+
+    video = get_object_or_404(TaggedVideo, category=category, tag=tag)
 
     return {
         'elementid': elementid,

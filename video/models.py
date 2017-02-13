@@ -15,12 +15,12 @@ class TaggedVideoManager(models.Manager):
     of videos"""
 
 
-    def add(self, tag, videofile):
-        """Add a new video associated with this tag
+    def add(self, category, tag, videofile):
+        """Add a new video associated with this tag and category
         increment version numbers for any older videos"""
 
-        # do we have an existing TaggedVideo object for this tag?
-        tv, created = self.get_or_create(tag=tag)
+        # do we have an existing TaggedVideo object for this category and tag?
+        tv, created = self.get_or_create(category=category, tag=tag)
         if not created:
             # increment version numbers of all other videos for this tag
             for v in tv.video_set.all():
@@ -33,11 +33,16 @@ class TaggedVideoManager(models.Manager):
         return tv
 
 class TaggedVideo(models.Model):
-    """A video that represents a particular idgloss"""
+    """A video that can be tagged with a category (eg. gloss, definintion, feedback)
+    and a tag (eg. the gloss id) """
 
     objects = TaggedVideoManager()
 
+    category = models.CharField(max_length=50)
     tag = models.CharField(max_length=50)
+
+    class Meta:
+        unique_together = (("category", "tag"),)
 
     @property
     def video(self):

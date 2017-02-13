@@ -17,6 +17,8 @@ class BaseTest(TestCase):
         self.vidfilename2 = os.path.join(settings.MEDIA_ROOT,'video2.mov')
         self.videofile1 = File(open(self.vidfilename1, "rb"), "video1.mov")
         self.videofile2 = File(open(self.vidfilename2, "rb"), "video2.mov")
+        self.category = "test"
+
 
     def tearDown(self):
         # After each test, delete any left over files that
