@@ -68,8 +68,6 @@ def deletevideo(request, category, tag):
 
         messages.success(request, msgtext)
 
-        print(msgtext)
-
     # TODO: provide some feedback that it worked (if
     # immediate non-display of video isn't working)
     # return to referer

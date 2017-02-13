@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponseServerError
 
-from video.convertvideo import extract_frame, convert_video, ffmpeg
+from video.convertvideo import extract_frame, convert_video
 
 class TaggedVideoManager(models.Manager):
     """Manager for TaggedVideo that deals with versions
