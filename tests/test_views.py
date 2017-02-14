@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404
 from django.core.exceptions import MultipleObjectsReturned
 
-from video.views import VideoList, deletevideo, poster, video
+from video.views import upload, deletevideo, poster, video
 from video.models import TaggedVideo
 from .basetests import BaseTest
 
@@ -76,7 +76,7 @@ class AddVideoTests(BaseTest):
         to the given redirect url
         '''
         request = create_request(url=self.url, method='post', data=self.data)
-        response = VideoList.as_view()(request)
+        response = upload(request)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.data['redirect'], response.url)
 
@@ -86,7 +86,7 @@ class AddVideoTests(BaseTest):
         no video is uploaded.
         '''
         request = create_request(url=self.url, method='post')
-        response = VideoList.as_view()(request)
+        response = upload(request)
         self.assertEqual(response.status_code, 302)
         self.assertEqual('/',response.url)
 
@@ -98,7 +98,7 @@ class AddVideoTests(BaseTest):
         request = create_request(url=self.url, method='post')
         test_referer = 'test/test'
         request.META['HTTP_REFERER'] = test_referer
-        response = VideoList.as_view()(request)
+        response = upload(request)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(test_referer, response.url)
 
@@ -111,7 +111,7 @@ class AddVideoTests(BaseTest):
         tag = 3
         vid = TaggedVideo.objects.add(videofile=self.videofile1, tag=tag, category=self.category)
         # Now, add a video via addvideo
-        response = VideoList.as_view()(request)
+        response = upload(request)
 
         # There should now be two videos for the tag
         self.assertEqual(2, vid.versions())

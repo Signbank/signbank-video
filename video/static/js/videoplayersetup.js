@@ -1,14 +1,14 @@
 
-function videosetup(aspectRatio){
+function videosetup(elementid, aspectRatio){
 
-	var myPlayer = videojs('sign');
+	var myPlayer = videojs(elementid);
 
     function resizeVideoJS(){
 
       // Get the parent element's actual width
-      var width = document.getElementById('signbody').offsetWidth;
+      //var width = document.getElementById('signbody').offsetWidth;
       // Set width to fill parent element, Set height
-      myPlayer.dimensions(width, width * aspectRatio);
+      //myPlayer.dimensions(width, width * aspectRatio);
     }
 
     myPlayer.ready(function(){

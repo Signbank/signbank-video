@@ -15,8 +15,19 @@
 
 {% uploadform redirect='/' %}
 
-<ul>
-    <li><a href="{% url 'video:videolist' %}">List Videos</a></li>
+{% for video in videos %}
+    <div class='video'>
+        {% videoplayer elementid=video.tag category=video.category tag=video.tag %}
+
+        <p class='caption' style='margin-top: 3em'>
+            <a href="{% url 'video:video' category=video.category tag=video.tag %}">{{video.category}}/{{video.tag}}</a> ({{video.versions}} versions) |
+            <form method='post' action="{% url 'video:delete' category=video.category tag=video.tag %}">
+                {% csrf_token %}
+                <input type='submit' value='Delete'>
+            </form>
+        </p>
+    </div>
+{% endfor %}
 </ul>
 
 {% endblock %}

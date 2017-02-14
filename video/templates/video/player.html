@@ -1,16 +1,23 @@
-<video id='{{elementid}}' class='video-js vjs-default-skin vjs-static-controls'
-    poster='{{video.poster_url}}' controls autoplay preload='auto' muted
-    data-setup='{ "techOrder": ["html5", "flash"], "playbackRates": [0.25, 0.5, 1.0, 1.5] , "children": {
-        "controlBar": {
-            "children": {
-                "muteToggle": false,
-                "volumeControl": false
-            }
-        }
-    },
-    "plugins": {
-        "loopbutton": true
-    }
-}'>
- <source src='{{video.get_absolute_url}}' type='video/mp4' codecs='avc1.42E01E, mp4a.40.2'></source>
-</video>
+{% if video %}
+<div>
+    <video id="{{elementid}}" class="video-js vjs-default-skin"
+      controls preload="auto" autoplay muted width="{{width}}" height="{{height}}"
+      poster="{{video.poster_url}}"
+      data-setup='{
+          "techOrder": ["html5", "flash"],
+          "playbackRates": [0.25, 0.5, 1.0, 1.5],
+          "plugins": {
+              "loopbutton": true
+          }
+    }'  >
+     <source src="{{video.get_absolute_url}}" type="video/mp4" />
+
+     <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+    </video>
+</div>
+{% else %}
+
+
+
+<p>No Video</p>
+{% endif %}

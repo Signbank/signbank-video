@@ -23,14 +23,19 @@ def uploadform(identifier=None, redirect='/'):
     }
 
 @register.inclusion_tag("video/player.html")
-def videoplayer(elementid, category, tag):
+def videoplayer(elementid, category, tag, width=300, height=200):
     """
     Generate an HTML video player for a video given the category and tag
     """
 
-    video = get_object_or_404(TaggedVideo, category=category, tag=tag)
+    try:
+        video = TaggedVideo.objects.get(category=category, tag=tag)
+    except:
+        video = None
 
     return {
         'elementid': elementid,
-        'video': video
+        'video': video,
+        'width': width,
+        'height': height,
     }
