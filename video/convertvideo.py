@@ -12,7 +12,17 @@ try:
     FFMPEG_PROGRAM = settings.FFMPEG_PROGRAM
     FFMPEG_OPTIONS = settings.FFMPEG_OPTIONS
 except:
-    FFMPEG_PROGRAM = "/Applications/ffmpegX.app/Contents/Resources/ffmpeg"
+    # try to find ffmpeg in a common location
+    paths = [
+        "/usr/bin/ffmpeg",
+        "/usr/local/bin/ffmpeg",
+        "/Applications/ffmpegX.app/Contents/Resources/ffmpeg",
+        ]
+    for path in paths:
+        if os.path.exists(path):
+            FFMPEG_PROGRAM = path
+            break
+
     #FFMPEG_OPTIONS = ["-vcodec", "libx264", "-an", "-vpre", "hq", "-crf", "22", "-threads", "0"]
     FFMPEG_OPTIONS = ["-vcodec", "h264", "-an"]
 
@@ -51,7 +61,7 @@ def ffmpeg(sourcefile, targetfile, timeout=60, options=[]):
     ffmpeg = [FFMPEG_PROGRAM, "-y", "-i", sourcefile]
     ffmpeg += options
     ffmpeg += [targetfile]
-    #print(" ".join(ffmpeg))  
+    #print(" ".join(ffmpeg))
     process =  Popen(ffmpeg, stdout=PIPE, stderr=PIPE)
     start = time.time()
     while process.poll() == None:
