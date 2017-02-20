@@ -5,11 +5,11 @@ signbank-video
 .. image:: https://badge.fury.io/py/signbank-video.png
     :target: https://badge.fury.io/py/signbank-video
 
-.. image:: https://travis-ci.org/hujosh/signbank-video.png?branch=master
-    :target: https://travis-ci.org/hujosh/signbank-video
+.. image:: https://travis-ci.org/Signbank/signbank-video.png?branch=master
+    :target: https://travis-ci.org/Signbank/signbank-video
 
-.. image:: https://codecov.io/gh/hujosh/signbank-video/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/hujosh/signbank-video
+.. image:: https://codecov.io/gh/Signbank/signbank-video/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/Signbank/signbank-video
 
 A Django application to handle video storage, designed to support the Signbank sign language
 dictionary application.  This basically provides a video store where videos can be

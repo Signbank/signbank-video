@@ -60,7 +60,6 @@ try:
         VIDEO_UPLOAD_LOCATION = "upload",
         GLOSS_VIDEO_DIRECTORY = "video",
 
-        FFMPEG_PROGRAM = "/usr/local/bin/ffmpeg",
         FFMPEG_TIMEOUT = 60,
         FFMPEG_OPTIONS = ["-vcodec", "h264", "-an"],
 
