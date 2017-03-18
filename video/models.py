@@ -85,7 +85,7 @@ class TaggedVideo(models.Model):
             return False
 
     def __str__(self):
-        return "%s (%s)" % (self.tag, self.video.videofile.name)
+        return "%s/%s" % (self.category, self.tag)
 
 class TaggedVideoStorage(FileSystemStorage):
     """Implement our shadowing video storage system"""

@@ -8,19 +8,35 @@ from video.forms import VideoUploadForm, VideoUploadTagForm
 register = Library()
 
 @register.inclusion_tag("video/uploadform.html")
-def uploadform(identifier=None, redirect='/'):
+def uploadform(category=None, tag=None, redirect='/'):
     """
     Generate a form to upload a new video.
     """
 
-    if identifier is None:
-        form = VideoUploadTagForm(initial={'tag': identifier, 'redirect': redirect})
+    if tag is not None and category is not None:
+        form = VideoUploadForm(initial={'category': category, 'tag': tag, 'redirect': redirect})
     else:
-        form = VideoUploadForm(initial={'redirect': redirect})
+        form = VideoUploadTagForm(initial={'redirect': redirect})
 
     return {
      'form': form,
     }
+
+@register.inclusion_tag("video/upload_modal.html")
+def upload_modal(id, category=None, tag=None, redirect='/'):
+    """
+    Generate a modal containing a video upload form supporting drag and drop.
+    """
+    if tag is not None and category is not None:
+        form = VideoUploadForm(initial={'category': category, 'tag': tag, 'redirect': redirect})
+    else:
+        form = VideoUploadTagForm(initial={'redirect': redirect})
+
+    return {
+     'id': id,
+     'form': form,
+    }
+
 
 @register.inclusion_tag("video/player.html")
 def videoplayer(elementid, category, tag, width=300, height=200):

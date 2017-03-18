@@ -1,0 +1,31 @@
+<!-- http://bootsnipp.com/snippets/featured/bootstrap-drag-and-drop-upload -->
+{% load bootstrap3 %}
+
+<div class="modal fade" id="{{id}}" tabindex="-1"
+     role="dialog" aria-labelledby="#uploadModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+       <div class="modal-content">
+           <div class='modal-header'>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+               <h2 id='uploadModalTitle'>Upload a Video</h2>
+           </div>
+           <form action="{% url 'video:upload' %}" method="post" enctype="multipart/form-data" id="video_upload_form">
+
+               <div class='modal-body'>
+
+                    <h4>Select files from your computer</h4>
+                    {% csrf_token %}
+                    <div class="form-inline">
+                      <div class="form-group">
+                          {% bootstrap_form form layout="inline" %}
+                      </div>
+                    </div>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                   <button type="submit" class="btn btn-sm btn-primary" id="js-upload-submit">Upload</button>
+                </div>
+            </form>
+       </div>
+   </div>
+</div>

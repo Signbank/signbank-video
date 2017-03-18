@@ -19,6 +19,30 @@
     </div>
 </div>
 
+<div class='panel panel-default'>
+    <div class='panel-body'>
+        <h2>Upload Video Modal</h2>
+
+        <div>
+            <button id='upload_video_button' class='btn btn-default'
+                    data-toggle='modal'
+                    data-target='#upload_video_modal'>Upload Video for Cat/dog</button>
+
+            {% upload_modal id='upload_video_modal' category='Cat' tag='dog' redirect='/' %}
+        </div>
+
+        <div>
+
+            <button id='delete_gloss_btn' class='btn btn-default'
+                    data-toggle='modal'
+                    data-target='#upload_modal2'>Upload Video Set Category + Tag</button>
+
+            {% upload_modal id='upload_modal2' redirect='/' %}
+        </div>
+
+    </div>
+</div>
+
 {% for video in videos %}
     <div class='video'>
         {% videoplayer elementid=video.tag category=video.category tag=video.tag %}
