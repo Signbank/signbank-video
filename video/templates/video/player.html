@@ -1,5 +1,5 @@
 {% if video %}
-    <video id="{{elementid}}" class="video-js vjs-default-skin"
+    <video id="{{id}}" class="video-js vjs-default-skin"
       {% if width > 120 %}controls{% endif %} {# no room for controls on small videos #}
       preload="auto" autoplay muted width="{{width}}" height="{{height}}"
       poster="{{video.poster_url}}"
