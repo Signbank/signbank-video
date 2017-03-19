@@ -55,3 +55,22 @@ def videoplayer(elementid, category, tag, width=300, height=200):
         'width': width,
         'height': height,
     }
+
+
+@register.inclusion_tag("video/thumbnail-popup.html")
+def thumbnail_popup(id, category, tag, width=300, height=200):
+    """
+    Generate a thumbnail image that triggers a modal video player
+    """
+
+    try:
+        video = TaggedVideo.objects.get(category=category, tag=tag)
+    except:
+        video = None
+
+    return {
+        'id': id,
+        'video': video,
+        'width': width,
+        'height': height,
+    }

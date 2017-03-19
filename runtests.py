@@ -21,6 +21,7 @@ try:
             "django.contrib.auth",
             "django.contrib.contenttypes",
             "django.contrib.sites",
+            "bootstrap3",
             "video",
         ],
         SITE_ID=1,

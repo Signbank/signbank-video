@@ -1,0 +1,39 @@
+{% if video %}
+<!-- Link to trigger modal -->
+<div class="video-thumbnail">
+    <a href="#"  data-toggle="modal" data-target="#{{id}}">
+            <img src="{{video.poster_url}}" width=150px alt="Sign Video thumbnail">
+    </a>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="{{id}}" tabindex="-1" role="dialog" aria-labelledby="{{id}}Label">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <video id="{{id}}player" class="video-js vjs-default-skin"
+            style="margin: auto"
+                controls
+                preload="auto" autoplay muted  width="{{width}}" height="{{height}}"
+                poster="{{video.poster_url}}"
+                data-setup='{
+                    "playbackRates": [0.25, 0.5, 1.0, 1.5],
+                    "plugins": {"loopbutton": true},
+                    "controlBar": { "volumeMenuButton": false }
+              }'  >
+               <source src="{{video.get_absolute_url}}" type="video/mp4" />
+
+               <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+            </video>
+           </div>
+        </div>
+    </div>
+</div>
+
+
+{% else %}
+<p>No Video</p>
+{% endif %}

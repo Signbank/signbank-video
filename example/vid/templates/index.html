@@ -43,6 +43,15 @@
     </div>
 </div>
 
+    <ul>
+{% for video in videos %}
+<li>
+    {% thumbnail_popup id=video.tag category=video.category tag=video.tag width=600 height=400 %}
+</li>
+{% endfor %}
+</ul>
+
+
 {% for video in videos %}
     <div class='video'>
         {% videoplayer elementid=video.tag category=video.category tag=video.tag %}
@@ -56,6 +65,6 @@
         </p>
     </div>
 {% endfor %}
-</ul>
+
 
 {% endblock %}
