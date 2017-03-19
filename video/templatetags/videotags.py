@@ -39,7 +39,7 @@ def upload_modal(id, category=None, tag=None, redirect='/'):
 
 
 @register.inclusion_tag("video/player.html")
-def videoplayer(elementid, category, tag, width=300, height=200):
+def videoplayer(id, category, tag, width=300, height=200):
     """
     Generate an HTML video player for a video given the category and tag
     """
@@ -50,7 +50,7 @@ def videoplayer(elementid, category, tag, width=300, height=200):
         video = None
 
     return {
-        'elementid': elementid,
+        'id': id,
         'video': video,
         'width': width,
         'height': height,
