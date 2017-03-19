@@ -31,7 +31,7 @@ class TemplateTagTests(BaseTest):
 
         vid = TaggedVideo.objects.add(category="test", tag="hello", videofile=self.videofile1)
 
-        tpl = Template("{% load videotags %} {% videoplayer elementid='xyzzy' category='test' tag='hello' %}")
+        tpl = Template("{% load videotags %} {% videoplayer id='xyzzy' category='test' tag='hello' %}")
 
         rendered = tpl.render(Context({}))
         self.assertIn('id="xyzzy"', rendered)
