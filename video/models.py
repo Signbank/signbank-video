@@ -101,6 +101,7 @@ class TaggedVideoStorage(FileSystemStorage):
         result = os.path.join(targetdir, path)
         return result
 
+
 class Video(models.Model):
     """An uploaded video"""
     videofile = models.FileField("video file",

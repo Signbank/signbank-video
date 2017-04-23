@@ -18,10 +18,11 @@
 	width: 17px;
 	height: 17px;
 	margin: 0.5em auto 0;
+	color: #fff;
 }
 
 .vjs-default-skin .vjs-loop-button:hover {
-    text-shadow: 0 0 1em #fff; 
+    text-shadow: 0 0 1em #fff;
 }
 
 .vjs-control-active {

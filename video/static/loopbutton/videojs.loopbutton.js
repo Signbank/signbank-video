@@ -27,12 +27,11 @@ videojs.plugin('loopbutton', function(options) {
   			this.addClass('vjs-control-active');
   		}
 	  }
-  });
+    } );
 
 	player.ready(function(){
 		var button = new LoopButton(player);
 		player.controlBar.addChild(button);
-
 		player.on('ended', function() {
 			if(player.options_['loop'] == true) {
 				player.play();

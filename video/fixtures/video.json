@@ -1,0 +1,29 @@
+[
+{
+    "pk": 1,
+    "model": "video.glossvideo",
+    "fields": {
+        "gloss": 3,
+        "version": 0,
+        "videofile": "glossvideo/10/100.mp4"
+    }
+},
+{
+    "pk": 2,
+    "model": "video.glossvideo",
+    "fields": {
+        "gloss": 1,
+        "version": 1,
+        "videofile": "glossvideo/12/123.mp4.bak"
+    }
+},
+{
+    "pk": 3,
+    "model": "video.glossvideo",
+    "fields": {
+        "gloss": 1,
+        "version": 0,
+        "videofile": "glossvideo/12/123.mp4"
+    }
+}
+]
