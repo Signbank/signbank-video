@@ -11,14 +11,20 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('video', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Video',
+            name='TaggedVideo',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('videofile', models.FileField(upload_to='glossvideo', verbose_name='video file')),
+                ('category', models.CharField(max_length=50)),
+                ('tag', models.CharField(max_length=50)),
             ],
-        )
+        ),
+        migrations.AlterUniqueTogether(
+            name='taggedvideo',
+            unique_together=set([('category', 'tag')]),
+        ),
     ]

@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('video', '0001_initial'),
+        ('video', '0002_taggedvideo'),
     ]
 
     operations = [
