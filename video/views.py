@@ -22,7 +22,7 @@ def upload(request):
         vfile.name = "%s.mp4" % (tag,)
 
         tagvid = TaggedVideo.objects.add(category, tag, vfile)
-
+        
         messages.success(request,
             "Your video has been successfully uploaded")
         return HttpResponseRedirect(form.cleaned_data['redirect'])

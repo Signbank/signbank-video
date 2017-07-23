@@ -40,3 +40,21 @@
   color: #222;
   border-color: #222;
 }
+
+
+/* make the video thumbnail center in a fixed width block */
+.video-thumbnail {
+    width: 150px;
+    height: 113px;
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.vjs-control-active {
+    font-weight: bold;
+}
+.vjs-control-active::after {
+    content: ' \2713'
+}

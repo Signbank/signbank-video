@@ -1,6 +1,25 @@
 {% extends "baselayout.html" %}
 {% load videotags %}
 
+{% block pagecss %}
+.thumblist {
+    display: block;
+    overflow: auto;
+}
+.thumblist li {
+    list-style-type: none;
+    display: block;
+    float: left;
+    padding: 1em;
+}
+.vjs-control-active {
+    font-weight: bold;
+}
+.vjs-control-active::after {
+    content: ' \2713'
+}
+{% endblock %}
+
 {% block title %}Signbank Video Test{% endblock %}
 
 {% block content %}
@@ -43,7 +62,8 @@
     </div>
 </div>
 
-    <ul>
+<h2>Thumbnails</h2>
+    <ul class='thumblist'>
 {% for video in videos %}
 <li>
     {% thumbnail_popup id=video.tag category=video.category tag=video.tag width=600 height=400 %}
@@ -52,9 +72,12 @@
 </ul>
 
 
+<h2>Video Embedded</h2>
+
 {% for video in videos %}
     <div class='video'>
-        {% videoplayer elementid=video.tag category=video.category tag=video.tag %}
+
+        {% videoplayer id=video.tag category=video.category tag=video.tag %}
 
         <p class='caption' style='margin-top: 3em'>
             <a href="{% url 'video:video' category=video.category tag=video.tag %}">{{video.category}}/{{video.tag}}</a> ({{video.versions}} versions) |
