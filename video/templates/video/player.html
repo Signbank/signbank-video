@@ -1,3 +1,4 @@
+<div class='video-wrapper'>
 {% if video %}
     <video id="{{id}}" class="video-js vjs-default-skin"
       {% if width > 150 %}controls{% endif %} {# no room for controls on small videos #}
@@ -13,3 +14,4 @@
 {% else %}
 <p>No Video</p>
 {% endif %}
+</div>
