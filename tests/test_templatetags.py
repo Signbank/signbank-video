@@ -34,7 +34,7 @@ class TemplateTagTests(BaseTest):
         tpl = Template("{% load videotags %} {% videoplayer id='xyzzy' category='test' tag='hello' %}")
 
         rendered = tpl.render(Context({}))
-        self.assertIn('id="xyzzy"', rendered)
+        self.assertIn("id='xyzzy'", rendered)
         self.assertIn(vid.video.videofile.name, rendered)
         self.assertIn('</video>', rendered)
 
