@@ -1,18 +1,14 @@
 from django import forms
 
-from video.models import TaggedVideo
 
 class VideoUploadForm(forms.Form):
-    """Form for video upload with a hidden field for the category and tag"""
+    """Form for video upload with a hidden field for the content_type and object_id"""
     videofile = forms.FileField(label="")
-    category = forms.CharField(widget=forms.HiddenInput)
-    tag = forms.CharField(widget=forms.HiddenInput)
+    content_type = forms.CharField(widget=forms.HiddenInput)
+    object_id = forms.CharField(widget=forms.HiddenInput)
     redirect = forms.CharField(widget=forms.HiddenInput, required=False)
 
 
-class VideoUploadTagForm(forms.Form):
-    """Form for video upload including the category and tag fields"""
-    videofile = forms.FileField(label="")
-    category = forms.CharField()
-    tag = forms.CharField()
-    redirect = forms.CharField(widget=forms.HiddenInput, required=False)
+class VideoUploadMultipleForm(VideoUploadForm):
+    """Form for video upload including the content_type and object_id fields"""
+    videofile = forms.FileField(label=False, widget=forms.FileInput(attrs={'multiple': True,}))

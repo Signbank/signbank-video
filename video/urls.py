@@ -7,9 +7,9 @@ app_name = "video"
 urlpatterns = [
     url(r'^video/$', views.upload, name='upload'),
     # ex: video/1/
-    url(r'^video/(?P<category>[^/]+)/(?P<tag>[^/]+)$', views.video, name='video'),
+    url(r'^video/(?P<content_type_id>[^/]+)/(?P<object_id>[^/]+)$', views.video, name='video'),
     # ex: delete/1/
-    url(r'^delete/(?P<category>[^/]+)/(?P<tag>[^/]+)/$', views.deletevideo, name='delete'),
+    url(r'^delete/(?P<content_type_id>[^/]+)/(?P<object_id>[^/]+)/$', views.deletevideo, name='delete'),
     # ex: poster/1/
-    url(r'^poster/(?P<category>[^/]+)/(?P<tag>[^/]+)/$', views.poster, name='poster'),
+    url(r'^poster/(?P<content_type_id>[^/]+)/(?P<object_id>[^/]+)/$', views.poster, name='poster'),
 ]

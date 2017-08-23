@@ -33,8 +33,16 @@
 {% endfor %}
 
 <div class='panel panel-default'>
+    <div class="panel-heading">Upload video for: <strong>{{test_object}}</strong></div>
     <div class='panel-body'>
-{% uploadform redirect='/' %}
+    {% uploadform obj=test_object redirect='/' %}
+    </div>
+</div>
+
+<div class='panel panel-default'>
+    <div class="panel-heading">Upload multiple videos for: <strong>{{test_object}}</strong></div>
+    <div class='panel-body'>
+    {% uploadform obj=test_object multiple=True redirect='/' %}
     </div>
 </div>
 
@@ -45,9 +53,9 @@
         <div>
             <button id='upload_video_button' class='btn btn-default'
                     data-toggle='modal'
-                    data-target='#upload_video_modal'>Upload Video for Cat/dog</button>
+                    data-target='#upload_video_modal'>Upload Video for: {{test_object}}</button>
 
-            {% upload_modal id='upload_video_modal' category='Cat' tag='dog' redirect='/' %}
+            {% upload_modal id='upload_video_modal' obj=test_object redirect='/' %}
         </div>
 
         <div>
@@ -63,25 +71,74 @@
 </div>
 
 <h2>Thumbnails</h2>
+{% verbatim %}
+<pre>
+  {% get_taggedvideo_for_object object as taggedvideo %}
+  {% for video in taggedvideo.videos %}
+      {% thumbnail_popup id=video.id video=video width=600 height=400 %}
+  {% endfor %}
+</pre>
+{% endverbatim %}
     <ul class='thumblist'>
-{% for video in videos %}
+{% get_taggedvideo_for_object test_object as taggedvideo %}
+  {% for video in taggedvideo.videos %}
 <li>
-    {% thumbnail_popup id=video.tag category=video.category tag=video.tag width=600 height=400 %}
+    {% thumbnail_popup id=video.id video=video width=600 height=400 %}
 </li>
-{% endfor %}
+  {% endfor %}
+
 </ul>
 
 
 <h2>Video Embedded</h2>
+<h4>Get videos with template tag -> List only the video with version=0:</h4>
+{% verbatim %}
+<pre>
+  {% get_taggedvideo_for_object object as taggedvideo %}
+  {% videoplayer video=taggedvideo.video %}
+</pre>
+{% endverbatim %}
+{% get_taggedvideo_for_object test_object as taggedvideo %}
+    {% videoplayer video=taggedvideo %}
+    <p class='caption' style='margin-top: 3em'>
+        <a href="{% url 'video:video' content_type_id=taggedvideo.content_type.id object_id=taggedvideo.id %}">{{taggedvideo.content_type}}/{{taggedvideo.object_id}}</a> ({{taggedvideo.versions}} versions) |
+        <form method='post' action="{% url 'video:delete' content_type_id=taggedvideo.content_type.id object_id=taggedvideo.object_id %}">
+            {% csrf_token %}
+            <input type='submit' value='Delete'>
+        </form>
+    </p>
+    <hr>
 
+<h4>Get videos with template tag -> List all videos of a TaggedVideo (all versions):</h4>
+{% verbatim %}
+<pre>
+  {% get_taggedvideo_for_object object as taggedvideo %}
+  {% for video in taggedvideo.videos %}
+      {% videoplayer video=video %}
+  {% endfor %}
+</pre>
+{% endverbatim %}
+{% get_taggedvideo_for_object test_object as taggedvideo %}
+    {% for video in taggedvideo.videos %}
+      {#<video controls poster="{{video.poster_url}}"><source src="{{video.get_absolute_url}}" type="video/mp4" /></video>#}
+      {% videoplayer video=video %}
+    <hr>
+    {% endfor %}
+<h3>Videos from context variable:</h3>
+{% verbatim %}
+<pre>
+  {% for video in videos %}
+      {% videoplayer video=video %}
+  {% endfor %}
+</pre>
+{% endverbatim %}
 {% for video in videos %}
     <div class='video'>
-
-        {% videoplayer id=video.tag category=video.category tag=video.tag %}
+        {% videoplayer video=video %}
 
         <p class='caption' style='margin-top: 3em'>
-            <a href="{% url 'video:video' category=video.category tag=video.tag %}">{{video.category}}/{{video.tag}}</a> ({{video.versions}} versions) |
-            <form method='post' action="{% url 'video:delete' category=video.category tag=video.tag %}">
+            <a href="{% url 'video:video' content_type_id=video.content_type.id object_id=video.id %}">{{video.content_type}}/{{video.object_id}}</a> ({{video.versions}} versions) |
+            <form method='post' action="{% url 'video:delete' content_type_id=video.content_type.id object_id=video.object_id %}">
                 {% csrf_token %}
                 <input type='submit' value='Delete'>
             </form>

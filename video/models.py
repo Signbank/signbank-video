@@ -1,28 +1,27 @@
-import sys
 import os
-import time
-import shutil
 
 from django.db import models, transaction, IntegrityError
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponseServerError
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.core.exceptions import ObjectDoesNotExist
 
 from video.convertvideo import extract_frame, convert_video
+
 
 class TaggedVideoManager(models.Manager):
     """Manager for TaggedVideo that deals with versions
     of videos"""
 
-
-    def add(self, category, tag, videofile):
-        """Add a new video associated with this tag and category
+    def add(self, content_type, object_id, videofile):
+        """Add a new video associated with this object_id and content_type,
         increment version numbers for any older videos"""
 
-        # do we have an existing TaggedVideo object for this category and tag?
-        tv, created = self.get_or_create(category=category, tag=tag)
+        # do we have an existing TaggedVideo object for this content_type and object_id?
+        tv, created = self.get_or_create(content_type__id=content_type, object_id=object_id)
         if not created:
-            # increment version numbers of all other videos for this tag
+            # increment version numbers of all other videos for this object_id
             for v in tv.video_set.all():
                 v.version += 1
                 v.save()
@@ -32,23 +31,39 @@ class TaggedVideoManager(models.Manager):
 
         return tv
 
+    def get_for_object(self, obj):
+        """
+        Create a queryset matching all TaggedVideos associated with the given object.
+        """
+        content_type = ContentType.objects.get_for_model(obj)
+        try:
+            return self.get(content_type__pk=content_type.pk, object_id=obj.pk)
+        except ObjectDoesNotExist:
+            return None
+
+
 class TaggedVideo(models.Model):
-    """A video that can be tagged with a category (eg. gloss, definintion, feedback)
-    and a tag (eg. the gloss id) """
+    """A video that can be tagged with a content_type (eg. gloss, definintion, feedback)
+    and a object_id (eg. the gloss id) """
 
     objects = TaggedVideoManager()
 
-    category = models.CharField(max_length=50)
-    tag = models.CharField(max_length=50)
+    content_type = models.ForeignKey(ContentType, verbose_name="content type", on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField("object id", db_index=True)
+    object = GenericForeignKey("content_type", "object_id")
 
     class Meta:
-        unique_together = (("category", "tag"),)
+        unique_together = (("content_type", "object_id"),)
 
     @property
     def video(self):
-        """Return the most recent video version for this tag"""
-
+        """Return only the most recent video version for this TaggedVideo."""
         return Video.objects.get(tag=self, version=0)
+
+    @property
+    def videos(self):
+        """Return all videos for this TaggedVideo."""
+        return Video.objects.filter(tag=self)
 
     def get_absolute_url(self):
         return self.video.get_absolute_url()
@@ -85,7 +100,8 @@ class TaggedVideo(models.Model):
             return False
 
     def __str__(self):
-        return "%s/%s" % (self.category, self.tag)
+        return "%s/%s" % (self.content_type, self.object_id)
+
 
 class TaggedVideoStorage(FileSystemStorage):
     """Implement our shadowing video storage system"""

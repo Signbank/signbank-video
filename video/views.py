@@ -1,30 +1,30 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
-from django.shortcuts import redirect, render_to_response
-from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse
-from django.conf import settings
+from django.http import HttpResponseRedirect
 
 from video.models import TaggedVideo
-from video.forms import VideoUploadForm
+from video.forms import VideoUploadMultipleForm
 
 
 def upload(request):
-    """Upload a new video"""
+    """Upload a new video or multiple videos."""
 
-    form = VideoUploadForm(request.POST, request.FILES)
+    # Use VideoUploadMultipleForm, should work for both 1 file and multiple files.
+    form = VideoUploadMultipleForm(request.POST, request.FILES)
     if form.is_valid():
-        tag = form.cleaned_data['tag']
-        category = form.cleaned_data['category']
-        vfile = form.cleaned_data['videofile']
-        # Let's name the video
-        # ex: 3.mp4
-        vfile.name = "%s.mp4" % (tag,)
+        object_id = form.cleaned_data['object_id']
+        content_type = form.cleaned_data['content_type']
 
-        tagvid = TaggedVideo.objects.add(category, tag, vfile)
-        
-        messages.success(request,
-            "Your video has been successfully uploaded")
+        # Add all files sent in the form.
+        for f in request.FILES.getlist('videofile'):
+            f.name = "%s.mp4" % (object_id,) # Name the video, ex: 3.mp4
+            TaggedVideo.objects.add(content_type, object_id, f)
+
+        if len(request.FILES.getlist('videofile')) > 1:
+            messages.success(request, "Your videos have been successfully uploaded")
+        else:
+            messages.success(request, "Your video has been successfully uploaded")
+
         return HttpResponseRedirect(form.cleaned_data['redirect'])
     else:
         if 'HTTP_REFERER' in request.META:
@@ -33,20 +33,22 @@ def upload(request):
             url = '/'
         return redirect(url)
 
-def video(request, category, tag):
+
+def video(request, content_type_id, object_id):
     '''
-    Redirect to the video url for this category + tag
+    Redirect to the video url for this content_type + object_id
     '''
-    taggedvideo = get_object_or_404(TaggedVideo, category=category, tag=tag)
+    taggedvideo = get_object_or_404(TaggedVideo, content_type__id=content_type_id, object_id=object_id)
     return redirect(taggedvideo.get_absolute_url())
 
-def deletevideo(request, category, tag):
+
+def deletevideo(request, content_type_id, object_id):
     '''
     Remove the video for this gloss, if there is an older version
     then reinstate that as the current video (act like undo)
     '''
     if request.method == "POST":
-        video = get_object_or_404(TaggedVideo, category=category, tag=tag)
+        video = get_object_or_404(TaggedVideo, content_type__id=content_type_id, object_id=object_id)
         result = video.revert()
         # result is True if there is an older version we've reverted to
         if result:
@@ -67,9 +69,10 @@ def deletevideo(request, category, tag):
         url = '/'
     return redirect(url)
 
-def poster(request, category, tag):
+
+def poster(request, content_type_id, object_id):
     """Generate a still frame for a video (if needed) and
     generate a redirect to the static server for this frame"""
-    # We want the latest video associated with this tag(it has version 0)
-    video = get_object_or_404(TaggedVideo, category=category, tag=tag)
+    # We want the latest video associated with this object_id(it has version 0)
+    video = get_object_or_404(TaggedVideo, content_type__id=content_type_id, object_id=object_id)
     return redirect(video.poster_url())
