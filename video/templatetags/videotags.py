@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.template import Library, Node, Variable
 from django.template.exceptions import TemplateSyntaxError
 from django.contrib.contenttypes.models import ContentType
