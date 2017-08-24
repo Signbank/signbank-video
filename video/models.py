@@ -63,8 +63,7 @@ class TaggedVideo(models.Model):
 
     def videos(self):
         """Return all videos for this TaggedVideo."""
-        #return Video.objects.filter(tag=self).order_by('version')
-        return self.video_set.all().order_by('version')
+        return Video.objects.filter(tag=self).order_by('version')
 
     def get_absolute_url(self):
         try:
