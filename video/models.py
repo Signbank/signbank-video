@@ -58,12 +58,12 @@ class TaggedVideo(models.Model):
     @property
     def video(self):
         """Return only the most recent video version for this TaggedVideo."""
-        return Video.objects.get(tag=self, version=0)
+        return Video.objects.filter(tag=self).order_by('version').first()
+        #return Video.objects.get(tag=self, version=0)
 
-    @property
     def videos(self):
         """Return all videos for this TaggedVideo."""
-        return Video.objects.filter(tag=self)
+        return Video.objects.filter(tag=self).order_by('version')
 
     def get_absolute_url(self):
         return self.video.get_absolute_url()
@@ -74,12 +74,11 @@ class TaggedVideo(models.Model):
     def versions(self):
         """Return a count of the number of versions
         of videos for this tag"""
-
         return self.video_set.all().count()
 
     def revert(self):
-        """Revert to the previous version of the video
-        for this tag, deletes the current video.
+        """Revert to the previous version of the video for this TaggedVideo,
+        deletes the video with lowest version.
         Return True if an old version was removed,
         False if there was only one version or
         if something went wrong"""
@@ -90,8 +89,9 @@ class TaggedVideo(models.Model):
             try:
                 with transaction.atomic():
                     current.delete()
-                    for video in self.video_set.all():
-                        video.version -= 1
+                    # Make sure there aren't gaps between versions
+                    for i, video in enumerate(self.video_set.all().order_by('version')):
+                        video.version = i
                         video.save()
                     return True
             except IntegrityError:
