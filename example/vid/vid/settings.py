@@ -134,7 +134,7 @@ VIDEO_UPLOAD_LOCATION = "media"
 
 # location of ffmpeg, used to convert uploaded videos
 # Mac
-FFMPEG_PROGRAM = "/Applications/ffmpegX.app/Contents/Resources/ffmpeg"
+FFMPEG_PROGRAM = "/usr/bin/ffmpeg"
 # Windows
 #FFMPEG_PROGRAM = os.path.expanduser("~/documents/ffmpeg/bin/ffmpeg.exe")
 FFMPEG_TIMEOUT = 60

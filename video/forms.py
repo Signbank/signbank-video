@@ -1,18 +1,28 @@
+# -*- coding: utf-8 -*-
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 
-from video.models import TaggedVideo
 
 class VideoUploadForm(forms.Form):
-    """Form for video upload with a hidden field for the category and tag"""
-    videofile = forms.FileField(label="")
-    category = forms.CharField(widget=forms.HiddenInput)
-    tag = forms.CharField(widget=forms.HiddenInput)
+    """Form for uploading one video, with hidden fields for the content_type and object_id"""
+    videofile = forms.FileField(label='')
+    content_type = forms.CharField(widget=forms.HiddenInput)
+    object_id = forms.CharField(widget=forms.HiddenInput)
     redirect = forms.CharField(widget=forms.HiddenInput, required=False)
 
 
-class VideoUploadTagForm(forms.Form):
-    """Form for video upload including the category and tag fields"""
-    videofile = forms.FileField(label="")
-    category = forms.CharField()
-    tag = forms.CharField()
-    redirect = forms.CharField(widget=forms.HiddenInput, required=False)
+class VideoUploadMultipleForm(VideoUploadForm):
+    """Form for uploading multiple videos, with hidden fields for the content_type and object_id"""
+    videofile = forms.FileField(label='', widget=forms.FileInput(attrs={'multiple': True,}))
+
+
+class VideoUploadPickContentTypeForm(VideoUploadForm):
+    """Form for uploading one video, with ContentType and Object_id pickers."""
+    content_type = forms.ModelChoiceField(label='ContentType', queryset=ContentType.objects.all())
+    object_id = forms.IntegerField(label='object_id', widget=forms.NumberInput, min_value=0)
+
+
+class VideoUploadMultiplePickContentTypeForm(VideoUploadPickContentTypeForm):
+    """Form for uploading multiple videos, with ContentType and Object_id pickers."""
+    videofile = forms.FileField(label='', widget=forms.FileInput(attrs={'multiple': True, }))
+

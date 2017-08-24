@@ -1,30 +1,31 @@
-import sys
+# -*- coding: utf-8 -*-
 import os
-import time
-import shutil
 
 from django.db import models, transaction, IntegrityError
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponseServerError
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 
 from video.convertvideo import extract_frame, convert_video
+
 
 class TaggedVideoManager(models.Manager):
     """Manager for TaggedVideo that deals with versions
     of videos"""
 
-
-    def add(self, category, tag, videofile):
-        """Add a new video associated with this tag and category
+    def add(self, content_type, object_id, videofile):
+        """Add a new video associated with this object_id and content_type,
         increment version numbers for any older videos"""
 
-        # do we have an existing TaggedVideo object for this category and tag?
-        tv, created = self.get_or_create(category=category, tag=tag)
+        # do we have an existing TaggedVideo object for this content_type and object_id?
+        ct = ContentType.objects.get_for_id(content_type)
+        tv, created = self.get_or_create(content_type=ct, object_id=object_id)
         if not created:
-            # increment version numbers of all other videos for this tag
-            for v in tv.video_set.all():
-                v.version += 1
+            # increment version numbers of all other videos for this object_id
+            for i, v in enumerate(tv.video_set.all().order_by('version')):
+                v.version = i+1 # Saving current upload as 0.
                 v.save()
 
         video = Video(videofile=videofile, tag=tv, version=0)
@@ -32,39 +33,59 @@ class TaggedVideoManager(models.Manager):
 
         return tv
 
+    def get_for_object(self, obj):
+        """
+        Create a queryset matching all TaggedVideos associated with the given object.
+        """
+        content_type = ContentType.objects.get_for_model(obj)
+        try:
+            return self.get(content_type=content_type, object_id=obj.id)
+        except ObjectDoesNotExist:
+            return None
+
+
 class TaggedVideo(models.Model):
-    """A video that can be tagged with a category (eg. gloss, definintion, feedback)
-    and a tag (eg. the gloss id) """
+    """A video that can be tagged with a content_type (eg. gloss, definintion, feedback)
+    and a object_id (eg. the gloss id) """
 
     objects = TaggedVideoManager()
 
-    category = models.CharField(max_length=50)
-    tag = models.CharField(max_length=50)
+    content_type = models.ForeignKey(ContentType, verbose_name="content type", on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField("object id", db_index=True)
+    object = GenericForeignKey("content_type", "object_id")
 
     class Meta:
-        unique_together = (("category", "tag"),)
+        unique_together = (("content_type", "object_id"),)
 
     @property
     def video(self):
-        """Return the most recent video version for this tag"""
+        """Return only the most recent video version for this TaggedVideo."""
+        return Video.objects.filter(tag=self).order_by('version').first()
 
-        return Video.objects.get(tag=self, version=0)
+    def videos(self):
+        """Return all videos for this TaggedVideo."""
+        return Video.objects.filter(tag=self).order_by('version')
 
     def get_absolute_url(self):
-        return self.video.get_absolute_url()
+        try:
+            return self.video.get_absolute_url()
+        except AttributeError:
+            return None
 
     def poster_url(self):
-        return self.video.poster_url()
+        try:
+            return self.video.poster_url()
+        except AttributeError:
+            return None
 
     def versions(self):
         """Return a count of the number of versions
         of videos for this tag"""
-
         return self.video_set.all().count()
 
     def revert(self):
-        """Revert to the previous version of the video
-        for this tag, deletes the current video.
+        """Revert to the previous version of the video for this TaggedVideo,
+        deletes the video with lowest version.
         Return True if an old version was removed,
         False if there was only one version or
         if something went wrong"""
@@ -75,8 +96,9 @@ class TaggedVideo(models.Model):
             try:
                 with transaction.atomic():
                     current.delete()
-                    for video in self.video_set.all():
-                        video.version -= 1
+                    # Make sure there aren't gaps between versions
+                    for i, video in enumerate(self.video_set.all().order_by('version')):
+                        video.version = i
                         video.save()
                     return True
             except IntegrityError:
@@ -85,7 +107,8 @@ class TaggedVideo(models.Model):
             return False
 
     def __str__(self):
-        return "%s/%s" % (self.category, self.tag)
+        return "%s/%s" % (self.content_type, self.object_id)
+
 
 class TaggedVideoStorage(FileSystemStorage):
     """Implement our shadowing video storage system"""

@@ -1,13 +1,5 @@
 <form action="{% url 'video:upload' %}" method="post" enctype="multipart/form-data" id="video_upload_form">
   {% csrf_token %}
-<table>
-  <tr>
-      {{form}}
-  </tr>
-  <tr>
-      <td>
-          <input class='btn btn-primary' type='submit' value='Upload Video'/>
-      </td>
-  </tr>
-</table>
+  {{form}}
+  <input class='btn btn-primary' type='submit' value='{% if form.fields.videofile.widget.attrs.multiple %}Upload Videos{% else %}Upload Video{% endif %}'/>
 </form>
