@@ -18,12 +18,14 @@ def upload(request):
         # Add all files sent in the form.
         for f in request.FILES.getlist('videofile'):
             f.name = "%s.mp4" % (object_id,) # Name the video, ex: 3.mp4
-            TaggedVideo.objects.add(content_type, object_id, f)
-
-        if len(request.FILES.getlist('videofile')) > 1:
-            messages.success(request, "Your videos have been successfully uploaded")
-        else:
-            messages.success(request, "Your video has been successfully uploaded")
+            try:
+                TaggedVideo.objects.add(content_type, object_id, f)
+            except:
+                messages.error(request, "Error, unable to upload for, ContentType: " + form.cleaned_data['content_type']
+                               + " Object_ID: " + form.cleaned_data['object_id'])
+                break
+            else:
+                messages.success(request, "Your video: " + str(f) + " has been successfully uploaded")
 
         return HttpResponseRedirect(form.cleaned_data['redirect'])
     else:

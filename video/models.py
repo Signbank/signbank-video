@@ -3,9 +3,9 @@ import os
 from django.db import models, transaction, IntegrityError
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 
 from video.convertvideo import extract_frame, convert_video
 
@@ -19,11 +19,12 @@ class TaggedVideoManager(models.Manager):
         increment version numbers for any older videos"""
 
         # do we have an existing TaggedVideo object for this content_type and object_id?
-        tv, created = self.get_or_create(content_type__id=content_type, object_id=object_id)
+        ct = ContentType.objects.get_for_id(content_type)
+        tv, created = self.get_or_create(content_type=ct, object_id=object_id)
         if not created:
             # increment version numbers of all other videos for this object_id
-            for v in tv.video_set.all():
-                v.version += 1
+            for i, v in enumerate(tv.video_set.all().order_by('version')):
+                v.version = i+1 # Saving current upload as 0.
                 v.save()
 
         video = Video(videofile=videofile, tag=tv, version=0)
@@ -37,7 +38,7 @@ class TaggedVideoManager(models.Manager):
         """
         content_type = ContentType.objects.get_for_model(obj)
         try:
-            return self.get(content_type__pk=content_type.pk, object_id=obj.pk)
+            return self.get(content_type=content_type, object_id=obj.id)
         except ObjectDoesNotExist:
             return None
 
@@ -59,17 +60,23 @@ class TaggedVideo(models.Model):
     def video(self):
         """Return only the most recent video version for this TaggedVideo."""
         return Video.objects.filter(tag=self).order_by('version').first()
-        #return Video.objects.get(tag=self, version=0)
 
     def videos(self):
         """Return all videos for this TaggedVideo."""
-        return Video.objects.filter(tag=self).order_by('version')
+        #return Video.objects.filter(tag=self).order_by('version')
+        return self.video_set.all().order_by('version')
 
     def get_absolute_url(self):
-        return self.video.get_absolute_url()
+        try:
+            return self.video.get_absolute_url()
+        except AttributeError:
+            return None
 
     def poster_url(self):
-        return self.video.poster_url()
+        try:
+            return self.video.poster_url()
+        except AttributeError:
+            return None
 
     def versions(self):
         """Return a count of the number of versions

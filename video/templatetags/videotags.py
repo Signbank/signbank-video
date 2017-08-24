@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from video.models import TaggedVideo
 from video.forms import VideoUploadForm, VideoUploadMultipleForm
+from video.forms import VideoUploadPickContentTypeForm, VideoUploadMultiplePickContentTypeForm
 
 register = Library()
 
@@ -37,14 +38,18 @@ def upload_modal(id, obj=None, multiple=False, redirect='/'):
     """
     if multiple:
         form_to_use = VideoUploadMultipleForm
+        form_to_use_ct = VideoUploadMultiplePickContentTypeForm
     else:
         form_to_use = VideoUploadForm
+        form_to_use_ct = VideoUploadPickContentTypeForm
 
     if obj is not None:
+        # When object is delivered we can get its ContentType
         content_type = ContentType.objects.get_for_model(obj)
         form = form_to_use(initial={'content_type': content_type.id, 'object_id': obj.id, 'redirect': redirect})
     else:
-        form = form_to_use(initial={'redirect': redirect})
+        # When no object delivered, we must choose ContentType
+        form = form_to_use_ct(initial={'redirect': redirect})
 
     return {
      'id': id,
@@ -53,12 +58,12 @@ def upload_modal(id, obj=None, multiple=False, redirect='/'):
 
 
 @register.inclusion_tag("video/player.html")
-def videoplayer(video, width=300, height=200):
+def videoplayer(id, video, width=300, height=200):
     """
     Generate an HTML video player for a video given an object.
     """
     return {
-        'id': video.id,
+        'id': id,
         'video': video,
         'width': width,
         'height': height,
