@@ -2,11 +2,9 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from django.shortcuts import redirect, render_to_response
 from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse
-from django.conf import settings
 
-from video.models import TaggedVideo
-from video.forms import VideoUploadForm
+from .models import TaggedVideo
+from .forms import VideoUploadForm
 
 
 def upload(request):
@@ -22,7 +20,7 @@ def upload(request):
         vfile.name = "%s.mp4" % (tag,)
 
         tagvid = TaggedVideo.objects.add(category, tag, vfile)
-        
+
         messages.success(request,
             "Your video has been successfully uploaded")
         return HttpResponseRedirect(form.cleaned_data['redirect'])
@@ -33,18 +31,20 @@ def upload(request):
             url = '/'
         return redirect(url)
 
+
 def video(request, category, tag):
-    '''
+    """
     Redirect to the video url for this category + tag
-    '''
+    """
     taggedvideo = get_object_or_404(TaggedVideo, category=category, tag=tag)
     return redirect(taggedvideo.get_absolute_url())
 
+
 def deletevideo(request, category, tag):
-    '''
+    """
     Remove the video for this gloss, if there is an older version
     then reinstate that as the current video (act like undo)
-    '''
+    """
     if request.method == "POST":
         video = get_object_or_404(TaggedVideo, category=category, tag=tag)
         result = video.revert()
@@ -66,6 +66,7 @@ def deletevideo(request, category, tag):
     else:
         url = '/'
     return redirect(url)
+
 
 def poster(request, category, tag):
     """Generate a still frame for a video (if needed) and

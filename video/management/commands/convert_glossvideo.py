@@ -5,6 +5,8 @@ from django.db import models
 from django.core.management.base import LabelCommand
 
 # define this model here so that we can migrate from it to TaggedVideo
+
+
 class GlossVideo(models.Model):
     """Legacy video model"""
 

@@ -1,19 +1,15 @@
-import sys
 import os
-import time
-import shutil
 
 from django.db import models, transaction, IntegrityError
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponseServerError
 
-from video.convertvideo import extract_frame, convert_video
+from .convertvideo import extract_frame, convert_video
+
 
 class TaggedVideoManager(models.Manager):
     """Manager for TaggedVideo that deals with versions
     of videos"""
-
 
     def add(self, category, tag, videofile):
         """Add a new video associated with this tag and category
@@ -32,8 +28,9 @@ class TaggedVideoManager(models.Manager):
 
         return tv
 
+
 class TaggedVideo(models.Model):
-    """A video that can be tagged with a category (eg. gloss, definintion, feedback)
+    """A video that can be tagged with a category (eg. gloss, definition, feedback)
     and a tag (eg. the gloss id) """
 
     objects = TaggedVideoManager()
@@ -87,6 +84,7 @@ class TaggedVideo(models.Model):
     def __str__(self):
         return "%s/%s" % (self.category, self.tag)
 
+
 class TaggedVideoStorage(FileSystemStorage):
     """Implement our shadowing video storage system"""
 
@@ -116,11 +114,11 @@ class Video(models.Model):
         return self.videofile.url
 
     def __poster_path(self, create=True):
-        '''
+        """
         Return the path of the poster image for this
         video, if create=True, create the image if needed
         Return None if create=False and the file doesn't exist
-        '''
+        """
         vidpath, ext = os.path.splitext(self.videofile.path)
         poster_path = vidpath + ".jpg"
         if not os.path.exists(poster_path):

@@ -5,12 +5,9 @@ videojs.plugin('loopbutton', function(options) {
 	var VjsButton = videojs.getComponent('Button');
 	var LoopButton = videojs.extend(VjsButton, {
 
-	  // The `init()` method will also work for constructor logic here, but it is
-	  // deprecated. If you provide an `init()` method, it will override the
-	  // `constructor()` method!
 	  constructor: function() {
 	    VjsButton.call(this, player, options);
-	  }, // notice the comma
+	  },
 
 	  buttonText: 'Loop',
 
