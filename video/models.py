@@ -15,6 +15,9 @@ class TaggedVideoManager(models.Manager):
         """Add a new video associated with this tag and category
         increment version numbers for any older videos"""
 
+        # add the category name into the videofile name
+        videofile.name = "%s-%s" % (category, videofile.name)
+
         # do we have an existing TaggedVideo object for this category and tag?
         tv, created = self.get_or_create(category=category, tag=tag)
         if not created:
@@ -94,9 +97,20 @@ class TaggedVideoStorage(FileSystemStorage):
     def get_valid_name(self, name):
         """Generate a valid name, we use directories named for the
         first two digits in the filename to partition the videos"""
-        (targetdir, basename) = os.path.split(name)
-        path = os.path.join(str(basename)[:2], str(basename))
-        result = os.path.join(targetdir, path)
+        targetdir, basename = os.path.split(name)
+        if '-' in basename:
+            category, tag = basename.split('-', maxsplit=1)  # basename is eg. Gloss-1234.mp4
+        else:
+            category, tag = 'Base',  basename
+        # we make a dirname from the first two letters of the tag
+        # make it 00 if the basename is two digits or less
+        if len(tag) <= 6:
+            dirname = '00'
+        else:
+            dirname = str(tag)[:2]
+
+        path = os.path.join(dirname, str(tag))
+        result = os.path.join(targetdir, category, path)
         return result
 
 

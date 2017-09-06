@@ -16,7 +16,7 @@ def upload(request):
         category = form.cleaned_data['category']
         vfile = form.cleaned_data['videofile']
         # Let's name the video
-        # ex: 3.mp4
+        # ex: 123.mp4
         vfile.name = "%s.mp4" % (tag,)
 
         tagvid = TaggedVideo.objects.add(category, tag, vfile)

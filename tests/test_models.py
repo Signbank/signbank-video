@@ -30,7 +30,7 @@ class TaggedVideoTests(BaseTest):
         self.assertEqual(0, vid1.video.version)
         self.assertEqual(vid1, vid1.video.tag)
         self.assertEqual(vid1, vid2)
-        self.assertEqual(os.path.basename(vid1.video.videofile.name), self.videofile2.name)
+        self.assertEqual(os.path.basename(vid1.video.videofile.name), self.videofile2.name[5:])
 
         # should be two versions
         vv = Video.objects.filter(tag__tag__exact="hello")
@@ -46,7 +46,7 @@ class TaggedVideoTests(BaseTest):
         vid2 = TaggedVideo.objects.add(category="test", tag="hello", videofile=self.videofile2)
 
         self.assertTrue(vid2.revert())
-        self.assertEqual(os.path.basename(vid1.video.videofile.name), self.videofile1.name)
+        self.assertEqual(os.path.basename(vid1.video.videofile.name), self.videofile1.name[5:])
 
         # should be one version
         vv = Video.objects.filter(tag__tag__exact="hello")
