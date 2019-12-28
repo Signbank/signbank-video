@@ -119,7 +119,7 @@ class Video(models.Model):
     videofile = models.FileField("video file",
                                  upload_to=settings.GLOSS_VIDEO_DIRECTORY,
                                  storage=TaggedVideoStorage())
-    tag = models.ForeignKey(TaggedVideo)
+    tag = models.ForeignKey(TaggedVideo, on_delete=models.CASCADE)
 
     # video version, most recent is 0
     version = models.IntegerField("Version", default=0)
