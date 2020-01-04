@@ -1,4 +1,4 @@
-django==1.11
+django==1.11.23
 coverage==4.2
 mock>=1.0.1
 flake8>=2.1.0
