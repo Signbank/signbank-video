@@ -1,0 +1,12 @@
+  {% load static %}
+
+  <!-- JS required for video display -->
+    <script src="//vjs.zencdn.net/6.2.0/video.js"></script>
+    <script type="text/javascript" src="{% static 'js/videojs-looper.js' %}"></script>
+    <script>
+        $('.thumbnail-video-modal').on('shown.bs.modal', function(event) {
+            id = $(event.target).find('.video-js').attr('id');
+            videojs(id).play();
+        })
+    </script>
+    <!-- end video JS -->

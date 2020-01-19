@@ -1,4 +1,4 @@
-from django.template import Library
+from django.template import Library, Node, TemplateSyntaxError
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 
@@ -6,6 +6,13 @@ from video.models import TaggedVideo
 from video.forms import VideoUploadForm, VideoUploadTagForm
 
 register = Library()
+
+@register.inclusion_tag("video/javascript.html")
+def load_video_javascript():
+    """Include the required JS for video playback"""
+
+    return {}
+
 
 @register.inclusion_tag("video/uploadform.html")
 def uploadform(category=None, tag=None, redirect='/'):
@@ -58,7 +65,7 @@ def videoplayer(id, category, tag, width=300, height=200):
 
 
 @register.inclusion_tag("video/thumbnail-popup.html")
-def thumbnail_popup(id, category, tag, width=300, height=200):
+def thumbnail_popup(id, category, tag, width=300, height=200, preload='auto'):
     """
     Generate a thumbnail image that triggers a modal video player
     """
@@ -70,7 +77,37 @@ def thumbnail_popup(id, category, tag, width=300, height=200):
 
     return {
         'id': id,
+        'tag': tag,
         'video': video,
         'width': width,
         'height': height,
+        'preload': preload,
     }
+
+
+@register.tag("category_videos")
+def do_get_tagged_videos(parser, token):
+    """Template tag to get a list of videos with a given tag
+    {% category_videos grammar_videos Grammar %}
+    {% for video in grammar_videos %}
+    ...
+    {% endfor %}
+    """
+    try:
+        # split_contents() knows not to split quoted strings.
+        template_tag, variable_name, category = token.split_contents()
+    except ValueError:
+        raise TemplateSyntaxError(
+            "%r tag requires exactly three arguments" % token.contents.split()[0]
+        )
+    return TaggedVideoNode(variable_name, category)
+
+
+class TaggedVideoNode(Node):
+    def __init__(self, variable_name, category):
+        self.variable_name = variable_name
+        self.category = category
+        
+    def render(self, context):
+        context[self.variable_name] = TaggedVideo.objects.filter(category=self.category)
+        return ''
