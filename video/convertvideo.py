@@ -80,7 +80,8 @@ def ffmpeg(sourcefile, targetfile, timeout=60, options=[]):
 def extract_frame(sourcefile, targetfile):
     """Extract a single frame from the source video and
     write it to the target file"""
-    options = ["-r", "1", "-f", "mjpeg"]
+    # generate a small image 300px wide 
+    options = ["-r", "1", "-f", "mjpeg", "-vf", "scale=300:-1"]
     err = ffmpeg(sourcefile, targetfile, options=options)
 
 
