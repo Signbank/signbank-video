@@ -1,6 +1,7 @@
 from django.template import Library, Node, TemplateSyntaxError
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
+import natsort
 
 from video.models import TaggedVideo
 from video.forms import VideoUploadForm, VideoUploadTagForm
@@ -109,5 +110,8 @@ class TaggedVideoNode(Node):
         self.category = category
         
     def render(self, context):
-        context[self.variable_name] = TaggedVideo.objects.filter(category=self.category)
+
+        # return videos in natural sorted order by tag, eg. 5.1, 5.7, 5.7a, 5.10 etc
+        context[self.variable_name] = natsort.natsorted(TaggedVideo.objects.filter(category=self.category),
+                                                        key=lambda x: x.tag)
         return ''
